@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.ByteBuffer;
 
 public class AudioForwarder implements AudioSendHandler {
-
     private final AudioPlayer player;
     private final Guild guild;
     private final ByteBuffer buffer = ByteBuffer.allocate(1024);

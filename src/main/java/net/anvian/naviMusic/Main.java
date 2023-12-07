@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Activity;
 public class Main {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
+
         JDA jda = JDABuilder.createDefault(dotenv.get("TOKEN"))
                 .setActivity(Activity.customStatus("Waiting for the music"))
                 .build();

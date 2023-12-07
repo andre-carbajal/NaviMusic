@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerManager {
-
     private static PlayerManager INSTANCE;
     private final Map<Long, GuildMusicManager> guildMusicManagers = new HashMap<>();
     private final AudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();

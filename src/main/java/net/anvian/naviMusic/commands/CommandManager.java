@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandManager extends ListenerAdapter {
-
     private final List<ICommand> commands = new ArrayList<>();
 
     @Override
