@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.load();
         JDA jda = JDABuilder.createDefault(dotenv.get("TOKEN"))
-                .setActivity(Activity.customStatus("Playing music"))
+                .setActivity(Activity.customStatus("Waiting for the music"))
                 .build();
 
         CommandManager manager = new CommandManager();
