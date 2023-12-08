@@ -62,7 +62,7 @@ public class Queue implements ICommand {
         }
         for(int i = 0; i < queue.size(); i++) {
             AudioTrackInfo info = queue.get(i).getInfo();
-            embedBuilder.addField(i+1 + ": " + info.title, "", false);
+            embedBuilder.addField(i+1 + " : " + info.title, "", false);
         }
         event.replyEmbeds(embedBuilder.build()).queue();
     }
