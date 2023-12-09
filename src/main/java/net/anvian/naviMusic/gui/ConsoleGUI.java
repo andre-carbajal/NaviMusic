@@ -10,6 +10,7 @@ import java.io.PrintStream;
 public class ConsoleGUI {
     private final JFrame frame;
     private final JTextArea textArea;
+    private boolean isVisible;
 
     public ConsoleGUI() {
         frame = new JFrame("Navi Music Console");
@@ -24,32 +25,35 @@ public class ConsoleGUI {
     }
 
     private void redirectSystemStreams() {
-        OutputStream out = new OutputStream() {
-            @Override
-            public void write(int b) {
-                updateTextArea(String.valueOf((char) b));
-            }
+        if (isVisible) {
+            OutputStream out = new OutputStream() {
+                @Override
+                public void write(int b) {
+                    updateTextArea(String.valueOf((char) b));
+                }
 
-            @Override
-            public void write(@NotNull byte[] b, int off, int len) {
-                updateTextArea(new String(b, off, len));
-            }
+                @Override
+                public void write(@NotNull byte[] b, int off, int len) {
+                    updateTextArea(new String(b, off, len));
+                }
 
-            @Override
-            public void write(@NotNull byte[] b) {
-                write(b, 0, b.length);
-            }
-        };
-
-        System.setOut(new PrintStream(out, true));
-        System.setErr(new PrintStream(out, true));
-    }
-
-    private void updateTextArea(final String text) {
-        SwingUtilities.invokeLater(() -> textArea.append(text));
+                @Override
+                public void write(@NotNull byte[] b) {
+                    write(b, 0, b.length);
+                }
+            };
+            System.setOut(new PrintStream(out, true));
+            System.setErr(new PrintStream(out, true));
+        }
     }
 
     public void setVisible(boolean visible) {
         frame.setVisible(visible);
+        this.isVisible = visible;
+        redirectSystemStreams();
+    }
+
+    private void updateTextArea(final String text) {
+        SwingUtilities.invokeLater(() -> textArea.append(text));
     }
 }

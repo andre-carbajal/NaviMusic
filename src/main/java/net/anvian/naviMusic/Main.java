@@ -10,10 +10,9 @@ import net.dv8tion.jda.api.entities.Activity;
 
 public class Main {
     public static void main(String[] args) {
+        boolean isGuiVisible = args.length == 0 || !args[0].equals("nogui");
         ConsoleGUI consoleGUI = new ConsoleGUI();
-        if (args.length == 0 || !args[0].equals("no-gui")) {
-            consoleGUI.setVisible(true);
-        }
+        consoleGUI.setVisible(isGuiVisible);
 
         Dotenv dotenv = Dotenv.configure().load();
 
