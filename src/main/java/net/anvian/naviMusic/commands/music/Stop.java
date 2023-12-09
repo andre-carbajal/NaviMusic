@@ -34,6 +34,7 @@ public class Stop implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the stop command but was not in a voice channel");
             return;
         }
 
@@ -42,11 +43,13 @@ public class Stop implements ICommand {
 
         if(!selfVoiceState.inAudioChannel()) {
             event.reply("I am not in an audio channel").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the stop command but the bot was not in a voice channel");
             return;
         }
 
         if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
             event.reply("You are not in the same channel as me").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the stop command but was not in the same voice channel as the bot");
             return;
         }
 
@@ -55,5 +58,6 @@ public class Stop implements ICommand {
         trackScheduler.getQueue().clear();
         trackScheduler.getPlayer().stopTrack();
         event.reply("Stopped").queue();
+        System.out.println("User " + member.getEffectiveName() + " used the stop command");
     }
 }

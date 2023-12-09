@@ -33,6 +33,7 @@ public class Repeat implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the repeat command but was not in a voice channel");
             return;
         }
 
@@ -41,11 +42,13 @@ public class Repeat implements ICommand {
 
         if(!selfVoiceState.inAudioChannel()) {
             event.reply("I am not in an audio channel").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the repeat command but I was not in a voice channel");
             return;
         }
 
         if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
             event.reply("You are not in the same channel as me").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the repeat command but was not in the same voice channel as me");
             return;
         }
 
@@ -53,5 +56,6 @@ public class Repeat implements ICommand {
         boolean isRepeat = !guildMusicManager.getTrackScheduler().isRepeat();
         guildMusicManager.getTrackScheduler().setRepeat(isRepeat);
         event.reply("Repeat is now " + isRepeat).queue();
+        System.out.println("User " + member.getEffectiveName() + " toggled repeat to " + isRepeat);
     }
 }

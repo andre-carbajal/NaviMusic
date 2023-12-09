@@ -38,6 +38,7 @@ public class Play implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
+            System.out.println("User " + member.getEffectiveName() + " tried to use the play command but was not in a voice channel");
             return;
         }
 
@@ -49,6 +50,7 @@ public class Play implements ICommand {
         } else {
             if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
                 event.reply("You need to be in the same channel as me").queue();
+                System.out.println("User " + member.getEffectiveName() + " tried to use the play command but was not in the same voice channel as me");
                 return;
             }
         }
@@ -62,6 +64,7 @@ public class Play implements ICommand {
 
         PlayerManager playerManager = PlayerManager.get();
         event.reply("Playing").queue();
+        System.out.println("User " + member.getEffectiveName() + " used the play command");
         playerManager.play(event.getGuild(), name);
     }
 }
