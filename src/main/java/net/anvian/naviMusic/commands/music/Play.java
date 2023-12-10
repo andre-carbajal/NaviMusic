@@ -1,6 +1,9 @@
 package net.anvian.naviMusic.commands.music;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import net.anvian.naviMusic.commands.ICommand;
+import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -63,8 +66,20 @@ public class Play implements ICommand {
         }
 
         PlayerManager playerManager = PlayerManager.get();
-        event.reply("Playing").queue();
-        System.out.println("User " + member.getEffectiveName() + " used the play command");
+
+        GuildMusicManager musicManager = playerManager.getGuildMusicManager(event.getGuild());
+        AudioTrack track = null;
+        if (musicManager != null) {
+            track = musicManager.getTrackScheduler().getPlayer().getPlayingTrack();
+        }
+        if (track != null) {
+            AudioTrackInfo info = track.getInfo();
+            event.reply("Playing " + info.title).queue();
+            System.out.println("User " + member.getEffectiveName() + " used the play command to play " + info.title);
+        } else {
+            System.out.println("User " + member.getEffectiveName() + " used the play command but no track is playing");
+        }
+
         playerManager.play(event.getGuild(), name);
     }
 }
