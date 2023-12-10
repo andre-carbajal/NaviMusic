@@ -12,17 +12,7 @@ import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        if (args.length > 0 && args[0].equals("nogui")) {
-            System.setProperty("java.awt.headless", "true");
-        }
-
-        if (!GraphicsEnvironment.isHeadless()) {
-            boolean isGuiVisible = args.length == 0 || !args[0].equals("nogui");
-            ConsoleGUI consoleGUI = new ConsoleGUI();
-            consoleGUI.setVisible(isGuiVisible);
-            System.out.println("Running in headless mode");
-        }else
-            System.out.println("Not running in headless mode");
+        checkGui(args);
 
         Dotenv dotenv = Dotenv.configure().load();
 
@@ -39,5 +29,16 @@ public class Main {
         manager.add(new Stop());
 
         jda.addEventListener(manager);
+    }
+    private static void checkGui(String[] args){
+        if (args.length > 0 && args[0].equals("nogui")) {
+            System.setProperty("java.awt.headless", "true");
+        }
+
+        if (!GraphicsEnvironment.isHeadless()) {
+            boolean isGuiVisible = args.length == 0 || !args[0].equals("nogui");
+            ConsoleGUI consoleGUI = new ConsoleGUI();
+            consoleGUI.setVisible(isGuiVisible);
+        }
     }
 }
