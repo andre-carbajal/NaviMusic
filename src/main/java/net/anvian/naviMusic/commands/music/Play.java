@@ -50,6 +50,7 @@ public class Play implements ICommand {
 
         if(!selfVoiceState.inAudioChannel()) {
             event.getGuild().getAudioManager().openAudioConnection(memberVoiceState.getChannel());
+            event.getGuild().getAudioManager().setSelfDeafened(true);
         } else {
             if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
                 event.reply("You need to be in the same channel as me").queue();
