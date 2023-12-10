@@ -33,7 +33,7 @@ The `.env` file is located in the `src/main/resources` directory and is used to 
     ```
 3. Build the project with Maven
     ```bash
-    mvn clean package
+    mvn clean compile
     ```
 
 ### Running the Application
