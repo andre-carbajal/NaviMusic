@@ -54,12 +54,12 @@ public class PlayerManager {
 
             @Override
             public void noMatches() {
-
+                System.out.println("No matches found for " + trackURL);
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-
+                System.out.println("Could not play: " + exception.getMessage());
             }
         });
     }
