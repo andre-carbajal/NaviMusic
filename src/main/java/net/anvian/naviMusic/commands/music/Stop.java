@@ -58,6 +58,7 @@ public class Stop implements ICommand {
         trackScheduler.getQueue().clear();
         trackScheduler.getPlayer().stopTrack();
         event.reply("Stopped").queue();
+        event.getGuild().getAudioManager().closeAudioConnection();
         System.out.println("User " + member.getEffectiveName() + " used the stop command");
     }
 }
