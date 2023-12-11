@@ -57,6 +57,7 @@ public class Play implements ICommand {
         }
 
         String name = event.getOption("name").getAsString();
+        String songTitle = name;
         try {
             new URI(name);
         } catch (URISyntaxException e) {
@@ -64,7 +65,7 @@ public class Play implements ICommand {
         }
 
         PlayerManager playerManager = PlayerManager.get();
-        event.reply("Playing").queue();
+        event.reply("Playing: " + songTitle).queue();
         System.out.println("User " + member.getEffectiveName() + " used the play command");
         playerManager.play(event.getGuild(), name);
     }
