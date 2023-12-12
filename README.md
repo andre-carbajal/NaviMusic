@@ -7,6 +7,7 @@ Welcome to NaviMusic, a highly user-friendly music bot for Discord. Developed us
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Running the Application](#running-the-application)
+- [Docker Usage](#docker-usage)
 - [License](#license)
 
 ## Getting Started
@@ -19,6 +20,7 @@ Before you begin, ensure you have the following installed on your machine:
 
 - Java 17
 - Maven
+- Docker (optional)
 
 ## Installation
 
@@ -32,32 +34,51 @@ Follow these steps to get a copy of NaviMusic on your local machine:
     ```bash
     cd NaviMusic
     ```
-3. **Set up your environment variables**
-
-   Before compiling the project, you need to set up your environment variables:
-
-   1. Navigate to the `src/main/resources` directory.
-   2. Rename the `.envexample` file to `.env`.
-   3. Open the `.env` file and replace `your_discord_token` with your actual Discord token.
-
-   > ⚠️ **Security Notice:** The `.env` file is used to safely store sensitive information such as tokens and passwords. Never share your `.env` file or any sensitive information from it.
-
-4. **Build the project with Maven**
+3. **Build the project with Maven**
     ```bash
     mvn clean compile
     ```
 
 ## Running the Application
 
-You can run NaviMusic using the following command:
+You can run NaviMusic using the following commands:
 
+### With DISCORD_TOKEN in your system variables:
+
+With GUI:
 ```bash
 java -jar target/NaviMusic-1.0-jar-with-dependencies.jar
 ```
 
-For a console-only experience, you can run NaviMusic with the `nogui` parameter:
+Without GUI:
 ```bash
 java -jar target/NaviMusic-1.0-jar-with-dependencies.jar nogui
+```
+
+### With DISCORD_TOKEN as a command line argument:
+
+With GUI:
+```bash
+java -jar target/NaviMusic-1.0-jar-with-dependencies.jar <your_discord_token>
+```
+
+Without GUI:
+```bash
+java -jar target/NaviMusic-1.0-jar-with-dependencies.jar <your_discord_token> nogui
+```
+
+## Docker Usage
+
+You can also run NaviMusic using Docker. First, build the Docker image:
+
+```bash
+docker build -t navimusic .
+```
+
+Then, run the Docker container, passing your Discord token as an argument:
+
+```bash
+docker run -e DISCORD_TOKEN=your_discord_token navimusic
 ```
 
 ## License

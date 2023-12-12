@@ -27,6 +27,3 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/
-
-# dotenv file
-.env
