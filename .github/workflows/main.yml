@@ -23,6 +23,9 @@ jobs:
         run: echo "VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)"
         shell: bash
 
+      - name: Debug version
+        run: echo ${{ steps.extract_version.outputs.VERSION }}
+
       - name: Build with Maven
         run: mvn clean compile
 
