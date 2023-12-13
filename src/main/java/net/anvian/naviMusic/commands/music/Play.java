@@ -59,11 +59,21 @@ public class Play implements ICommand {
         String name = event.getOption("name").getAsString();
         String songTitle = name;
         try {
-            new URI(name);
+            URI uri = new URI(name);
+            if (uri.getHost().contains("youtube.com") && uri.getQuery().contains("list=")) {
+                PlayerManager playerManager = PlayerManager.get();
+                playerManager.loadAndPlayPlaylist(event.getGuild(), name);
+                event.reply("Added songs from the playlist to the queue: " + songTitle).queue();
+                System.out.println("User " + member.getEffectiveName() + " used the play command to queue a playlist");
+            } else {
+                playASong(event, songTitle, member, name);
+            }
         } catch (URISyntaxException e) {
             name = "ytsearch:" + name;
+            playASong(event, songTitle, member, name);
         }
-
+    }
+    private void playASong(SlashCommandInteractionEvent event , String songTitle, Member member , String name){
         PlayerManager playerManager = PlayerManager.get();
         event.reply("Playing: " + songTitle).queue();
         System.out.println("User " + member.getEffectiveName() + " used the play command");

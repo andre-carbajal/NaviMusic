@@ -2,6 +2,7 @@ package net.anvian.naviMusic.lavaplayer;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 
 public class GuildMusicManager {
@@ -21,5 +22,8 @@ public class GuildMusicManager {
 
     public AudioForwarder getAudioForwarder() {
         return audioForwarder;
+    }
+    public void queue(AudioTrack track) {
+        trackScheduler.queue(track);
     }
 }

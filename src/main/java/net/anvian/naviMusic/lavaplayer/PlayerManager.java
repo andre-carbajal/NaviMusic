@@ -9,7 +9,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 
+import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerManager {
@@ -60,6 +62,33 @@ public class PlayerManager {
             @Override
             public void loadFailed(FriendlyException exception) {
                 System.out.println("Could not play: " + exception.getMessage());
+            }
+        });
+    }
+
+    public void loadAndPlayPlaylist(final Guild guild, final String trackUrl) {
+        GuildMusicManager musicManager = getGuildMusicManager(guild);
+        audioPlayerManager.loadItemOrdered(guild, trackUrl, new AudioLoadResultHandler() {
+            @Override
+            public void trackLoaded(AudioTrack track) {
+                System.out.println(track);
+            }
+
+            @Override
+            public void playlistLoaded(AudioPlaylist playlist) {
+                for (AudioTrack track : playlist.getTracks()) {
+                    musicManager.queue(track);
+                }
+            }
+
+            @Override
+            public void noMatches() {
+                System.out.println("No matches found for " + trackUrl);
+            }
+
+            @Override
+            public void loadFailed(FriendlyException throwable) {
+                System.out.println("Could not play: " + throwable.getMessage());
             }
         });
     }
