@@ -81,10 +81,10 @@ public class Queue implements ICommand {
             embedBuilder.setDescription("Queue is empty");
             System.out.println("User " + member.getEffectiveName() + " tried to use the queue command but the queue is empty");
         }
+        System.out.println("User " + member.getEffectiveName() + " used the queue command");
         for(int i = startIndex; i < endIndex; i++) {
             AudioTrackInfo info = queue.get(i).getInfo();
             embedBuilder.addField(i+1 + " : " + info.title, "", false);
-            System.out.println("User " + member.getEffectiveName() + " used the queue command");
         }
 
         InteractionHook hook = event.deferReply().complete();
