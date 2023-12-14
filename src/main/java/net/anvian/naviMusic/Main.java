@@ -28,6 +28,7 @@ public class Main {
         manager.add(new Repeat());
         manager.add(new Skip());
         manager.add(new Stop());
+        manager.add(new Shuffle());
 
         jda.addEventListener(manager);
     }

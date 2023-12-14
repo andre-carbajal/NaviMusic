@@ -23,6 +23,7 @@ public class GuildMusicManager {
     public AudioForwarder getAudioForwarder() {
         return audioForwarder;
     }
+
     public void queue(AudioTrack track) {
         trackScheduler.queue(track);
     }

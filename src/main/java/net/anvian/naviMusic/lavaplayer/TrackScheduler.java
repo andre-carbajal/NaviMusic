@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -46,5 +47,10 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void setRepeat(boolean repeat) {
         isRepeat = repeat;
+    }
+
+    public void setQueue(List<AudioTrack> queue) {
+        this.queue.clear();
+        this.queue.addAll(queue);
     }
 }
