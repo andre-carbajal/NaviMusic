@@ -21,6 +21,10 @@ public class AudioForwarder implements AudioSendHandler {
         frame.setBuffer(buffer);
     }
 
+    public AudioPlayer getAudioPlayer() {
+        return player;
+    }
+
     @Override
     public boolean canProvide() {
         boolean canProvide = player.provide(frame);
