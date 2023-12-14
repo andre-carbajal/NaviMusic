@@ -42,44 +42,56 @@ Follow these steps to get a copy of NaviMusic on your local machine:
 ## Running the Application
 
 You can run NaviMusic using the following commands:
+Replace x.y with the version number of the last release.
 
 ### With DISCORD_TOKEN in your system variables:
 
 With GUI:
 ```bash
-java -jar target/NaviMusic-1.0-jar-with-dependencies.jar
+java -jar target/NaviMusic-x.y.jar
 ```
 
 Without GUI:
 ```bash
-java -jar target/NaviMusic-1.0-jar-with-dependencies.jar nogui
+java -jar target/NaviMusic-x.y.jar nogui
 ```
 
 ### With DISCORD_TOKEN as a command line argument:
 
 With GUI:
 ```bash
-java -jar target/NaviMusic-1.0-jar-with-dependencies.jar <your_discord_token>
+java -jar target/NaviMusic-x.y <your_discord_token>
 ```
 
 Without GUI:
 ```bash
-java -jar target/NaviMusic-1.0-jar-with-dependencies.jar <your_discord_token> nogui
+java -jar target/NaviMusic-x.y <your_discord_token> nogui
 ```
 
 ## Docker Usage
 
-You can also run NaviMusic using Docker. First, build the Docker image:
+You have two options to run NaviMusic using Docker:
 
-```bash
-docker build -t navimusic .
-```
+1. **Pull the Docker image from Docker Hub:**
 
-Then, run the Docker container, passing your Discord token as an argument:
+    ```bash
+    docker pull anvian/navi-music
+    docker run -e DISCORD_TOKEN=your_discord_token anvian/navi-music
+    ```
 
-```bash
-docker run -e DISCORD_TOKEN=your_discord_token navimusic
-```
+2. **Or, build and run the Docker image locally:**
+
+   First, build the Docker image:
+
+    ```bash
+    docker build -t navimusic .
+    ```
+
+   Then, run the Docker container, passing your Discord token as an argument:
+
+    ```bash
+    docker run -e DISCORD_TOKEN=your_discord_token navimusic
+    ```
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
