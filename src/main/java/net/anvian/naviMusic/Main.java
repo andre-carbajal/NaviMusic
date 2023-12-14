@@ -30,6 +30,8 @@ public class Main {
         manager.add(new Stop());
         manager.add(new Shuffle());
         manager.add(new Volume());
+        manager.add(new Pause());
+        manager.add(new Continue());
 
         jda.addEventListener(manager);
     }
