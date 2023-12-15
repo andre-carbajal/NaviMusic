@@ -67,17 +67,17 @@ public class Queue implements ICommand {
         int startIndex = 0;
         int endIndex = Math.min(startIndex + 10, queue.size());
 
-        if(queue.isEmpty()) {
+        StringBuilder sb = new StringBuilder();
+
+        if(!queue.isEmpty()) {
+            for(int i = startIndex; i < endIndex; i++) {
+                AudioTrackInfo info = queue.get(i).getInfo();
+                sb.append(i+1).append(" : ").append(info.title).append("\n");
+                embedBuilder.addField("Queue:", sb.toString(), false);
+            }
+        }else {
             embedBuilder.setDescription("Queue is empty");
         }
-
-        StringBuilder sb = new StringBuilder();
-        for(int i = startIndex; i < endIndex; i++) {
-            AudioTrackInfo info = queue.get(i).getInfo();
-            sb.append(i+1).append(" : ").append(info.title).append("\n");
-        }
-
-        embedBuilder.addField("Queue", sb.toString(), false);
 
         InteractionHook hook = event.deferReply().complete();
         Message originalMessage;
