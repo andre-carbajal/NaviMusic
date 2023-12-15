@@ -27,7 +27,7 @@ public class Play implements ICommand {
     @Override
     public List<OptionData> getOptions() {
         List<OptionData> options = new ArrayList<>();
-        options.add(new OptionData(OptionType.STRING, "name", "Name of the song to play", true));
+        options.add(new OptionData(OptionType.STRING, "name-url-playlist", "Name of the song to play", true));
         return options;
     }
 
