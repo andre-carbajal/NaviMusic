@@ -32,6 +32,7 @@ public class Main {
         manager.add(new Volume());
         manager.add(new Pause());
         manager.add(new Continue());
+        manager.add(new Remove());
 
         jda.addEventListener(manager);
     }
