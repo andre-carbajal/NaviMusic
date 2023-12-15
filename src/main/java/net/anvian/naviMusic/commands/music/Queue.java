@@ -89,7 +89,7 @@ public class Queue implements ICommand {
         Message originalMessage;
 
         if(queue.size() < 10) {
-            originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).complete();
+            hook.sendMessageEmbeds(embedBuilder.build()).complete();
         } else {
             originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).addActionRow(BUTTONS).complete();
             event.getJDA().addEventListener(new ButtonClickEventListener(queue, originalMessage));
