@@ -19,7 +19,6 @@ public class TrackScheduler extends AudioEventAdapter {
         this.player = player;
     }
 
-
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if(isRepeat) {
@@ -35,6 +34,15 @@ public class TrackScheduler extends AudioEventAdapter {
         }
     }
 
+    public BlockingQueue<AudioTrack> getQueue() {
+        return queue;
+    }
+
+    public void setQueue(List<AudioTrack> queue) {
+        this.queue.clear();
+        this.queue.addAll(queue);
+    }
+
     public void removeSongAt(int index) {
         if (index >= 0 && index < queue.size()) {
             Iterator<AudioTrack> iterator = queue.iterator();
@@ -48,15 +56,6 @@ public class TrackScheduler extends AudioEventAdapter {
                 currentIndex++;
             }
         }
-    }
-
-    public BlockingQueue<AudioTrack> getQueue() {
-        return queue;
-    }
-
-    public void setQueue(List<AudioTrack> queue) {
-        this.queue.clear();
-        this.queue.addAll(queue);
     }
 
     public AudioPlayer getPlayer() {
