@@ -37,7 +37,14 @@ public class Help implements ICommand {
         embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
         for (ICommand command : commandManager.getCommands()) {
-            embedBuilder.addField("/" + command.getName(), command.getDescription(), false);
+            StringBuilder commandInfo = new StringBuilder("/" + command.getName());
+            List<OptionData> options = command.getOptions();
+            if (options != null) {
+                for (OptionData option : options) {
+                    commandInfo.append(" <").append(option.getName()).append(">");
+                }
+            }
+            embedBuilder.addField(commandInfo.toString(), command.getDescription(), false);
         }
 
         event.replyEmbeds(embedBuilder.build()).queue();
