@@ -63,14 +63,14 @@ public class Play implements ICommand {
                 playerManager.loadAndPlayPlaylist(event.getGuild(), name);
                 event.reply("Added songs from the playlist to the queue: " + songTitle).queue();
             } else {
-                playASong(event, songTitle, member, name);
+                playASong(event, songTitle, name);
             }
         } catch (URISyntaxException e) {
             name = "ytsearch:" + name;
-            playASong(event, songTitle, member, name);
+            playASong(event, songTitle, name);
         }
     }
-    private void playASong(SlashCommandInteractionEvent event , String songTitle, Member member , String name){
+    private void playASong(SlashCommandInteractionEvent event , String songTitle, String name){
         PlayerManager playerManager = PlayerManager.get();
         event.reply("Playing: " + songTitle).queue();
         playerManager.play(event.getGuild(), name);
