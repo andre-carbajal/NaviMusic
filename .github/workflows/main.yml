@@ -58,4 +58,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:${{ steps.extract_version.outputs.version }}
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:${{ steps.extract_version.outputs.version }}
