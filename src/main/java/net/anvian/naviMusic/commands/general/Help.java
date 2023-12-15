@@ -34,6 +34,7 @@ public class Help implements ICommand {
     public void execute(SlashCommandInteractionEvent event) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("List of Commands");
+        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
         for (ICommand command : commandManager.getCommands()) {
             embedBuilder.addField("/" + command.getName(), command.getDescription(), false);
