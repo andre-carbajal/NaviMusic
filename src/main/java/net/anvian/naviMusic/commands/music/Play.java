@@ -38,7 +38,6 @@ public class Play implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the play command but was not in a voice channel");
             return;
         }
 
@@ -51,7 +50,6 @@ public class Play implements ICommand {
         } else {
             if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
                 event.reply("You need to be in the same channel as me").queue();
-                System.out.println("User " + member.getEffectiveName() + " tried to use the play command but was not in the same voice channel as me");
                 return;
             }
         }
@@ -64,7 +62,6 @@ public class Play implements ICommand {
                 PlayerManager playerManager = PlayerManager.get();
                 playerManager.loadAndPlayPlaylist(event.getGuild(), name);
                 event.reply("Added songs from the playlist to the queue: " + songTitle).queue();
-                System.out.println("User " + member.getEffectiveName() + " used the play command to queue a playlist");
             } else {
                 playASong(event, songTitle, member, name);
             }
@@ -76,7 +73,6 @@ public class Play implements ICommand {
     private void playASong(SlashCommandInteractionEvent event , String songTitle, Member member , String name){
         PlayerManager playerManager = PlayerManager.get();
         event.reply("Playing: " + songTitle).queue();
-        System.out.println("User " + member.getEffectiveName() + " used the play command");
         playerManager.play(event.getGuild(), name);
     }
 }

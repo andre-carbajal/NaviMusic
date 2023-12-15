@@ -35,7 +35,6 @@ public class NowPlaying implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the nowplaying command but was not in a voice channel");
             return;
         }
 
@@ -44,20 +43,17 @@ public class NowPlaying implements ICommand {
 
         if(!selfVoiceState.inAudioChannel()) {
             event.reply("I am not in an audio channel").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the nowplaying command but I was not in a voice channel");
             return;
         }
 
         if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
             event.reply("You are not in the same channel as me").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the nowplaying command but was not in the same voice channel as me");
             return;
         }
 
         GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
         if(guildMusicManager.getTrackScheduler().getPlayer().getPlayingTrack() == null) {
             event.reply("I am not playing anything").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the nowplaying command but I was not playing anything");
             return;
         }
         AudioTrackInfo info = guildMusicManager.getTrackScheduler().getPlayer().getPlayingTrack().getInfo();
@@ -66,7 +62,7 @@ public class NowPlaying implements ICommand {
         embedBuilder.setDescription("**Name:** `" + info.title + "`");
         embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
         embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
-        System.out.println("User " + member.getEffectiveName() + " used the nowplaying command, currently playing " + info.title + " by " + info.author + " at " + info.uri);
+        event.replyEmbeds(embedBuilder.build()).queue();
         event.replyEmbeds(embedBuilder.build()).queue();
     }
 }

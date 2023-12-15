@@ -36,7 +36,6 @@ public class Shuffle implements ICommand {
 
         if(!memberVoiceState.inAudioChannel()) {
             event.reply("You need to be in a voice channel").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the shuffle command but was not in a voice channel");
             return;
         }
 
@@ -45,13 +44,11 @@ public class Shuffle implements ICommand {
 
         if(!selfVoiceState.inAudioChannel()) {
             event.reply("I am not in an audio channel").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the shuffle command but I was not in a voice channel");
             return;
         }
 
         if(selfVoiceState.getChannel() != memberVoiceState.getChannel()) {
             event.reply("You are not in the same channel as me").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the shuffle command but was not in the same voice channel as me");
             return;
         }
 
@@ -60,13 +57,11 @@ public class Shuffle implements ICommand {
 
         if(queue.isEmpty()) {
             event.reply("An empty list cannot be shuffled").queue();
-            System.out.println("User " + member.getEffectiveName() + " tried to use the shuffle command but the queue was empty");
             return;
         }
 
         Collections.shuffle(queue);
         guildMusicManager.getTrackScheduler().setQueue(queue);
         event.reply("The queue has been shuffled").queue();
-        System.out.println("User " + member.getEffectiveName() + " used the shuffle command");
     }
 }
