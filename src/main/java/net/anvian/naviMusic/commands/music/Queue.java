@@ -67,13 +67,6 @@ public class Queue implements ICommand {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Current Queue");
 
-        List<Button> buttons = new ArrayList<>();
-        buttons.add(Button.primary("page_first", Emoji.fromUnicode("⏪")));
-        buttons.add(Button.primary("page_previous", Emoji.fromUnicode("◀")));
-        buttons.add(Button.danger("page_cancel", Emoji.fromUnicode("❌")));
-        buttons.add(Button.primary("page_next", Emoji.fromUnicode("▶")));
-        buttons.add(Button.primary("page_last", Emoji.fromUnicode("⏩")));
-
         int startIndex = 0;
         int endIndex = Math.min(startIndex + 10, queue.size());
 
@@ -81,15 +74,26 @@ public class Queue implements ICommand {
             embedBuilder.setDescription("Queue is empty");
             System.out.println("User " + member.getEffectiveName() + " tried to use the queue command but the queue is empty");
         }
+
         System.out.println("User " + member.getEffectiveName() + " used the queue command");
+
+        StringBuilder sb = new StringBuilder();
         for(int i = startIndex; i < endIndex; i++) {
             AudioTrackInfo info = queue.get(i).getInfo();
-            embedBuilder.addField(i+1 + " : " + info.title, "", false);
+            sb.append(i+1).append(" : ").append(info.title).append("\n");
         }
 
+        embedBuilder.addField("Queue", sb.toString(), false);
+
         InteractionHook hook = event.deferReply().complete();
-        Message originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).addActionRow(buttons).complete();
-        event.getJDA().addEventListener(new ButtonClickEventListener(queue, originalMessage));
+        Message originalMessage;
+
+        if(queue.size() < 10) {
+            originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).complete();
+        } else {
+            originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).addActionRow(BUTTONS).complete();
+            event.getJDA().addEventListener(new ButtonClickEventListener(queue, originalMessage));
+        }
     }
 
     public static void updateEmbedWithCurrentPage(EmbedBuilder embedBuilder, List<AudioTrack> queue, int currentPage) {
@@ -105,4 +109,12 @@ public class Queue implements ICommand {
             }
         }
     }
+
+    private static final List<Button> BUTTONS = List.of(
+            Button.primary("page_first", Emoji.fromUnicode("⏪")),
+            Button.primary("page_previous", Emoji.fromUnicode("◀")),
+            Button.danger("page_cancel", Emoji.fromUnicode("❌")),
+            Button.primary("page_next", Emoji.fromUnicode("▶")),
+            Button.primary("page_last", Emoji.fromUnicode("⏩"))
+    );
 }
