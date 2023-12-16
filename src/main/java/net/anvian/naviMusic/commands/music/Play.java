@@ -54,7 +54,7 @@ public class Play implements ICommand {
             }
         }
 
-        String name = event.getOption("name").getAsString();
+        String name = event.getOption("name-url-playlist").getAsString();
         String songTitle = name;
         try {
             URI uri = new URI(name);
