@@ -90,20 +90,6 @@ public class Queue implements ICommand {
         }
     }
 
-    public static void updateEmbedWithCurrentPage(EmbedBuilder embedBuilder, List<AudioTrack> queue, int currentPage) {
-        int startIndex = currentPage * 10;
-        int endIndex = Math.min(startIndex + 10, queue.size());
-
-        if(queue.isEmpty()) {
-            embedBuilder.setDescription("Queue is empty");
-        } else {
-            for(int i = startIndex; i < endIndex; i++) {
-                AudioTrackInfo info = queue.get(i).getInfo();
-                embedBuilder.addField(i+1 + " : " + info.title, "", false);
-            }
-        }
-    }
-
     private static final List<Button> BUTTONS = List.of(
             Button.primary("page_first", Emoji.fromUnicode("⏪")),
             Button.primary("page_previous", Emoji.fromUnicode("◀")),
