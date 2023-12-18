@@ -73,9 +73,9 @@ public class Queue implements ICommand {
             for(int i = startIndex; i < endIndex; i++) {
                 AudioTrackInfo info = queue.get(i).getInfo();
                 sb.append(i+1).append(" : ").append(info.title).append("\n");
-                embedBuilder.addField("Queue:", sb.toString(), false);
             }
-        }else {
+            embedBuilder.addField("Queue:", sb.toString(), false);
+        } else {
             embedBuilder.setDescription("Queue is empty");
         }
 
