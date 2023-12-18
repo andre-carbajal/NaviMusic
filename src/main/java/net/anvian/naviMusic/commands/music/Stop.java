@@ -19,7 +19,7 @@ public class Stop implements ICommand {
 
     @Override
     public String getDescription() {
-        return "Will stop the bot playing";
+        return "The bot will disconnect";
     }
 
     @Override
