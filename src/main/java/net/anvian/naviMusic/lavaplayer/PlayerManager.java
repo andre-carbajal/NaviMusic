@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,32 +40,34 @@ public class PlayerManager {
         });
     }
 
-    public void play(Guild guild, String trackURL) {
+    public void play(Guild guild, String trackURL, SlashCommandInteractionEvent event, String songTitle) {
         GuildMusicManager guildMusicManager = getGuildMusicManager(guild);
         audioPlayerManager.loadItemOrdered(guildMusicManager, trackURL, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 guildMusicManager.getTrackScheduler().queue(track);
+                event.reply("Playing: " + songTitle).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 guildMusicManager.getTrackScheduler().queue(playlist.getTracks().get(0));
+                event.reply("Playing: " + songTitle).queue();
             }
 
             @Override
             public void noMatches() {
-                System.out.println("No matches found for " + trackURL);
+               event.reply("No matches found for " + songTitle).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                System.out.println("Could not play: " + exception.getMessage());
+                event.reply("Could not play: " + songTitle).queue();
             }
         });
     }
 
-    public void loadAndPlayPlaylist(final Guild guild, final String trackUrl) {
+    public void loadAndPlayPlaylist(final Guild guild, final String trackUrl, SlashCommandInteractionEvent event, String songTitle) {
         GuildMusicManager musicManager = getGuildMusicManager(guild);
         audioPlayerManager.loadItemOrdered(guild, trackUrl, new AudioLoadResultHandler() {
             @Override
@@ -75,18 +78,19 @@ public class PlayerManager {
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 for (AudioTrack track : playlist.getTracks()) {
-                    musicManager.queue(track);
+                    musicManager.getTrackScheduler().queue(track);
                 }
+                event.reply("Playing: " + songTitle).queue();
             }
 
             @Override
             public void noMatches() {
-                System.out.println("No matches found for " + trackUrl);
+                event.reply("No matches found for " + songTitle).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException throwable) {
-                System.out.println("Could not play: " + throwable.getMessage());
+                event.reply("Could not play: " + songTitle).queue();
             }
         });
     }
