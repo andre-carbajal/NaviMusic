@@ -2,7 +2,6 @@ package net.anvian.naviMusic.listener;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import net.anvian.naviMusic.commands.music.Queue;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -66,13 +65,16 @@ public class ButtonClickEventListener extends ListenerAdapter {
         int startIndex = currentPage * 10;
         int endIndex = Math.min(startIndex + 10, queue.size());
 
+        StringBuilder sb = new StringBuilder();
+
         if(queue.isEmpty()) {
             embedBuilder.setDescription("Queue is empty");
         } else {
             for(int i = startIndex; i < endIndex; i++) {
                 AudioTrackInfo info = queue.get(i).getInfo();
-                embedBuilder.addField(i+1 + " : " + info.title, "", false);
+                sb.append(i+1).append(" : ").append(info.title).append("\n");
             }
+            embedBuilder.addField("Queue:", sb.toString(), false);
         }
     }
 }
