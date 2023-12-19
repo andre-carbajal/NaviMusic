@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -56,12 +57,19 @@ public class NowPlaying implements ICommand {
             event.reply("I am not playing anything").queue();
             return;
         }
+        EmbedBuilder embedBuilder = getBuilder(guildMusicManager);
+        event.replyEmbeds(embedBuilder.build()).queue();
+    }
+
+    @NotNull
+    private static EmbedBuilder getBuilder(GuildMusicManager guildMusicManager) {
         AudioTrackInfo info = guildMusicManager.getTrackScheduler().getPlayer().getPlayingTrack().getInfo();
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Currently Playing");
+        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
         embedBuilder.setDescription("**Name:** `" + info.title + "`");
         embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
         embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
-        event.replyEmbeds(embedBuilder.build()).queue();
+        return embedBuilder;
     }
 }

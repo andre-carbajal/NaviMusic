@@ -4,6 +4,7 @@ import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
 import net.anvian.naviMusic.lavaplayer.TrackScheduler;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -54,7 +55,12 @@ public class Stop implements ICommand {
         TrackScheduler trackScheduler = guildMusicManager.getTrackScheduler();
         trackScheduler.getQueue().clear();
         trackScheduler.getPlayer().stopTrack();
-        event.reply("Stopped").queue();
         event.getGuild().getAudioManager().closeAudioConnection();
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Stop Command");
+        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+
+        event.replyEmbeds(embed.setDescription("The player has been stopped").build()).queue();
     }
 }

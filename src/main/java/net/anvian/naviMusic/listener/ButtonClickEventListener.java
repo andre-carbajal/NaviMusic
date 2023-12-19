@@ -56,6 +56,7 @@ public class ButtonClickEventListener extends ListenerAdapter {
         buttons.add(Button.primary("page_last", Emoji.fromUnicode("⏩")));
 
         EmbedBuilder msg = new EmbedBuilder();
+        msg.setThumbnail("https://i.imgur.com/xiiGqIO.png");
         updateEmbedWithCurrentPage(msg, queue, currentPage);
         originalMessage.delete().queue();
         originalMessage = event.getChannel().sendMessageEmbeds(msg.build()).setActionRow(buttons).complete();

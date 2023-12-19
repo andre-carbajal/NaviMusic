@@ -62,6 +62,7 @@ public class Queue implements ICommand {
         List<AudioTrack> queue = new ArrayList<>(guildMusicManager.getTrackScheduler().getQueue());
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
         embedBuilder.setTitle("Current Queue");
 
         int startIndex = 0;

@@ -3,6 +3,7 @@ package net.anvian.naviMusic.commands.music;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -37,6 +38,10 @@ public class Remove implements ICommand {
         GuildMusicManager musicManager = PlayerManager.get().getGuildMusicManager(guild);
         musicManager.getTrackScheduler().removeSongAt(songNumber - 1);
 
-        event.reply("Song number " + songNumber + " has been removed from the queue.").queue();
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Remove Command");
+        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+
+        event.replyEmbeds(embed.setDescription("Song number " + songNumber + " has been removed from the queue.").build()).queue();
     }
 }

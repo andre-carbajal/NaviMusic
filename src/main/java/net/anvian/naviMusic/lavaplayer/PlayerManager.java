@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -42,33 +43,39 @@ public class PlayerManager {
 
     public void play(Guild guild, String trackURL, SlashCommandInteractionEvent event, String songTitle) {
         GuildMusicManager guildMusicManager = getGuildMusicManager(guild);
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Play Command");
+        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
         audioPlayerManager.loadItemOrdered(guildMusicManager, trackURL, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 guildMusicManager.getTrackScheduler().queue(track);
-                event.reply("Playing: " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 guildMusicManager.getTrackScheduler().queue(playlist.getTracks().get(0));
-                event.reply("Playing: " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
             }
 
             @Override
             public void noMatches() {
-               event.reply("No matches found for " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("No matches found for " + songTitle).build()).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                event.reply("Could not play: " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("Could not play: " + songTitle).build()).queue();
             }
         });
     }
 
     public void loadAndPlayPlaylist(final Guild guild, final String trackUrl, SlashCommandInteractionEvent event, String songTitle) {
         GuildMusicManager musicManager = getGuildMusicManager(guild);
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Play Command");
+        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
         audioPlayerManager.loadItemOrdered(guild, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
@@ -81,17 +88,17 @@ public class PlayerManager {
                     musicManager.getTrackScheduler().queue(track);
                 }
                 event.deferReply().queue();
-                event.getHook().editOriginal("Playing: " + songTitle).queue();
+                event.getHook().editOriginalEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
             }
 
             @Override
             public void noMatches() {
-                event.reply("No matches found for " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("No matches found for " + songTitle).build()).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException throwable) {
-                event.reply("Could not play: " + songTitle).queue();
+                event.replyEmbeds(embedBuilder.setDescription("Could not play: " + songTitle).build()).queue();
             }
         });
     }

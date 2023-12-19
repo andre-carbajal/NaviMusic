@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -55,13 +56,17 @@ public class Shuffle implements ICommand {
         GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
         List<AudioTrack> queue = new ArrayList<>(guildMusicManager.getTrackScheduler().getQueue());
 
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Shuffle Command");
+        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+
         if(queue.isEmpty()) {
-            event.reply("An empty list cannot be shuffled").queue();
+            event.replyEmbeds(embed.setDescription("An empty list cannot be shuffled").build()).queue();
             return;
         }
 
         Collections.shuffle(queue);
         guildMusicManager.getTrackScheduler().setQueue(queue);
-        event.reply("The queue has been shuffled").queue();
+        event.replyEmbeds(embed.setDescription("The queue has been shuffled").build()).queue();
     }
 }

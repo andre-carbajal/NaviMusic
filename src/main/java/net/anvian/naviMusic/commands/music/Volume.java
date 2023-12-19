@@ -3,6 +3,7 @@ package net.anvian.naviMusic.commands.music;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.AudioForwarder;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -60,12 +61,16 @@ public class Volume implements ICommand {
 
         int volume = event.getOption("value").getAsInt();
 
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Volume Command");
+        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+
         if ((volume < 0 || volume > 100) && volume != 500) {
-            event.getHook().editOriginal("Volume must be between 0 and 100").queue();
+            event.getHook().editOriginalEmbeds(embed.setDescription("Volume must be between 0 and 100").build()).queue();
             return;
         }
 
         player.setVolume(volume);
-        event.getHook().editOriginal("Volume set to " + volume).queue();
+        event.getHook().editOriginalEmbeds(embed.setDescription("Volume set to `" + volume + "`").build()).queue();
     }
 }

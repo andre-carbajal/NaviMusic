@@ -3,6 +3,7 @@ package net.anvian.naviMusic.commands.music;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -51,6 +52,11 @@ public class Skip implements ICommand {
 
         GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
         guildMusicManager.getTrackScheduler().getPlayer().stopTrack();
-        event.reply("Skipped").queue();
+
+        EmbedBuilder embed = new EmbedBuilder();
+        embed.setTitle("Skip Command");
+        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+
+        event.replyEmbeds(embed.setDescription("Skipped").build()).queue();
     }
 }
