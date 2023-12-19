@@ -80,7 +80,8 @@ public class PlayerManager {
                 for (AudioTrack track : playlist.getTracks()) {
                     musicManager.getTrackScheduler().queue(track);
                 }
-                event.reply("Playing: " + songTitle).queue();
+                event.deferReply().queue();
+                event.getHook().editOriginal("Playing: " + songTitle).queue();
             }
 
             @Override
