@@ -63,6 +63,5 @@ public class NowPlaying implements ICommand {
         embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
         embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
         event.replyEmbeds(embedBuilder.build()).queue();
-        event.replyEmbeds(embedBuilder.build()).queue();
     }
 }
