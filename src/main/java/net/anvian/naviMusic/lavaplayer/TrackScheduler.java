@@ -43,6 +43,10 @@ public class TrackScheduler extends AudioEventAdapter {
         this.queue.addAll(queue);
     }
 
+    public void clearQueue() {
+        this.queue.clear();
+    }
+
     public void removeSongAt(int index) {
         if (index >= 0 && index < queue.size()) {
             Iterator<AudioTrack> iterator = queue.iterator();
