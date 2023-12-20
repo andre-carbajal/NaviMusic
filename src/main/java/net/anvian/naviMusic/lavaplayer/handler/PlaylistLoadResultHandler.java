@@ -12,6 +12,7 @@ public class PlaylistLoadResultHandler implements AudioLoadResultHandler {
     private final GuildMusicManager musicManager;
     private final SlashCommandInteractionEvent event;
     private final String trackUrl;
+    private final EmbedBuilder embedBuilder = new EmbedBuilder().setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
     public PlaylistLoadResultHandler(GuildMusicManager musicManager, SlashCommandInteractionEvent event, String trackUrl) {
         this.musicManager = musicManager;
@@ -29,17 +30,17 @@ public class PlaylistLoadResultHandler implements AudioLoadResultHandler {
         for (AudioTrack track : playlist.getTracks()) {
             musicManager.getTrackScheduler().queue(track);
         }
-        event.replyEmbeds(playlistInformation(trackUrl, playlist.getTracks().size(), new EmbedBuilder()).build()).queue();
+        event.replyEmbeds(playlistInformation(trackUrl, playlist.getTracks().size(), embedBuilder).build()).queue();
     }
 
     @Override
     public void noMatches() {
-        event.replyEmbeds(new EmbedBuilder().setDescription("No matches found for the playlist").build()).queue();
+        event.replyEmbeds(embedBuilder.setDescription("No matches found for the playlist").build()).queue();
     }
 
     @Override
     public void loadFailed(FriendlyException exception) {
-        event.replyEmbeds(new EmbedBuilder().setDescription("Could not play the playlist").build()).queue();
+        event.replyEmbeds(embedBuilder.setDescription("Could not play the playlist").build()).queue();
     }
 
     private EmbedBuilder playlistInformation(String trackUrl, int songCount, EmbedBuilder embedBuilder) {

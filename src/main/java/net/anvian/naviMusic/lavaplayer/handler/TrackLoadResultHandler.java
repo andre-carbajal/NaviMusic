@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 public class TrackLoadResultHandler implements AudioLoadResultHandler {
     private final GuildMusicManager guildMusicManager;
     private final SlashCommandInteractionEvent event;
+    private final EmbedBuilder embedBuilder = new EmbedBuilder().setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
     public TrackLoadResultHandler(GuildMusicManager guildMusicManager, SlashCommandInteractionEvent event) {
         this.guildMusicManager = guildMusicManager;
@@ -21,23 +22,23 @@ public class TrackLoadResultHandler implements AudioLoadResultHandler {
     @Override
     public void trackLoaded(AudioTrack track) {
         guildMusicManager.getTrackScheduler().queue(track);
-        event.replyEmbeds(trackInformation(track, new EmbedBuilder()).build()).queue();
+        event.replyEmbeds(trackInformation(track, embedBuilder).build()).queue();
     }
 
     @Override
     public void playlistLoaded(AudioPlaylist playlist) {
         guildMusicManager.getTrackScheduler().queue(playlist.getTracks().get(0));
-        event.replyEmbeds(trackInformation(playlist.getTracks().get(0), new EmbedBuilder()).build()).queue();
+        event.replyEmbeds(trackInformation(playlist.getTracks().get(0), embedBuilder).build()).queue();
     }
 
     @Override
     public void noMatches() {
-        event.replyEmbeds(new EmbedBuilder().setDescription("No matches found for the song").build()).queue();
+        event.replyEmbeds(embedBuilder.setDescription("No matches found for the song").build()).queue();
     }
 
     @Override
     public void loadFailed(FriendlyException exception) {
-        event.replyEmbeds(new EmbedBuilder().setDescription("Could not play the song").build()).queue();
+        event.replyEmbeds(embedBuilder.setDescription("Could not play the song").build()).queue();
     }
 
     private EmbedBuilder trackInformation(AudioTrack track, EmbedBuilder embedBuilder) {
