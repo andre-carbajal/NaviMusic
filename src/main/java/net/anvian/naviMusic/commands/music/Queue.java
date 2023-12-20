@@ -5,7 +5,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
-import net.anvian.naviMusic.listener.ButtonClickEventListener;
+import net.anvian.naviMusic.listener.ButtonClickEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -87,7 +87,7 @@ public class Queue implements ICommand {
             hook.sendMessageEmbeds(embedBuilder.build()).complete();
         } else {
             originalMessage = hook.sendMessageEmbeds(embedBuilder.build()).addActionRow(BUTTONS).complete();
-            event.getJDA().addEventListener(new ButtonClickEventListener(queue, originalMessage));
+            event.getJDA().addEventListener(new ButtonClickEvent(queue, originalMessage));
         }
     }
 

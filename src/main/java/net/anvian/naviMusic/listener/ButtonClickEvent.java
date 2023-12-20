@@ -12,12 +12,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ButtonClickEventListener extends ListenerAdapter {
+public class ButtonClickEvent extends ListenerAdapter {
     List<AudioTrack> queue;
     int currentPage = 0;
     Message originalMessage;
 
-    public ButtonClickEventListener(List<AudioTrack> queue, Message originalMessage) {
+    public ButtonClickEvent(List<AudioTrack> queue, Message originalMessage) {
         this.queue = queue;
         this.originalMessage = originalMessage;
     }

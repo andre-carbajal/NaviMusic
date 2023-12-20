@@ -1,69 +1,33 @@
 package net.anvian.naviMusic;
 
 import net.anvian.naviMusic.commands.CommandManager;
-import net.anvian.naviMusic.commands.general.Help;
-import net.anvian.naviMusic.commands.music.Queue;
-import net.anvian.naviMusic.commands.music.*;
-import net.anvian.naviMusic.gui.ConsoleGUI;
+import net.anvian.naviMusic.listener.CommandInitializer;
+import net.anvian.naviMusic.manager.GUIManager;
+import net.anvian.naviMusic.manager.TokenManager;
+import net.anvian.naviMusic.manager.VoiceChannelManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 
-import java.awt.*;
-
 public class Main {
+    private static final TokenManager tokenManager = new TokenManager();
+    private static final GUIManager guiManager = new GUIManager();
+    private static final VoiceChannelManager voiceChannelManager = new VoiceChannelManager();
+    private static final CommandInitializer commandInitializer = new CommandInitializer();
+
     public static void main(String[] args) {
-        String token = getToken(args);
-        String guiOption = getGuiOption(args);
+        guiManager.checkGui(getGuiOption(args));
 
-        checkGui(guiOption);
-
+        String token = tokenManager.getToken(args);
         JDA jda = JDABuilder.createDefault(token)
                 .setActivity(Activity.customStatus("Waiting for the music"))
                 .build();
 
-        CommandManager manager = new CommandManager();
-        manager.add(new Help(manager));
-        manager.add(new Play());
-        manager.add(new NowPlaying());
-        manager.add(new Remove());
-        manager.add(new Repeat());
-        manager.add(new Queue());
-        manager.add(new Skip());
-        manager.add(new Stop());
-        manager.add(new Shuffle());
-        manager.add(new Volume());
-        manager.add(new Pause());
-        manager.add(new Continue());
 
+        CommandManager manager = commandInitializer.initialize();
         jda.addEventListener(manager);
-    }
 
-    private static void checkGui(String guiOption){
-        if (guiOption.equals("nogui")) {
-            System.setProperty("java.awt.headless", "true");
-        }
-
-        if (!GraphicsEnvironment.isHeadless()) {
-            boolean isGuiVisible = !guiOption.equals("nogui");
-            ConsoleGUI consoleGUI = new ConsoleGUI();
-            consoleGUI.setVisible(isGuiVisible);
-        }
-    }
-
-    private static String getToken(String[] args) {
-        String token = System.getenv("DISCORD_TOKEN");
-
-        if (token == null || token.isEmpty()) {
-            if (args.length > 0) {
-                token = args[0];
-            } else {
-                System.out.println("Please provide the Discord token as an environment variable or as a command line argument.");
-                System.exit(1);
-            }
-        }
-
-        return token;
+        voiceChannelManager.scheduleDisconnect(jda);
     }
 
     private static String getGuiOption(String[] args) {
