@@ -1,8 +1,10 @@
 package net.anvian.naviMusic.commands.music;
 
+import net.anvian.naviMusic.commands.CommandUtils;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.AudioForwarder;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -29,6 +31,11 @@ public class Continue implements ICommand {
     public void execute(SlashCommandInteractionEvent event) {
         AudioManager audioManager = event.getGuild().getAudioManager();
         AudioForwarder forwarder = (AudioForwarder) audioManager.getSendingHandler();
+
+        Member member = event.getMember();
+        Member self = event.getGuild().getSelfMember();
+
+        if (!CommandUtils.validateVoiceState(event, member, self)) return;
 
         EmbedBuilder embed = new EmbedBuilder();
         embed.setTitle("Continue Command");

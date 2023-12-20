@@ -1,10 +1,12 @@
 package net.anvian.naviMusic.commands.music;
 
+import net.anvian.naviMusic.commands.CommandUtils;
 import net.anvian.naviMusic.commands.ICommand;
 import net.anvian.naviMusic.lavaplayer.GuildMusicManager;
 import net.anvian.naviMusic.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -32,6 +34,11 @@ public class Remove implements ICommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        Member member = event.getMember();
+        Member self = event.getGuild().getSelfMember();
+
+        if (!CommandUtils.validateVoiceState(event, member, self)) return;
+
         int songNumber = (int) event.getOption("number").getAsLong();
 
         Guild guild = event.getGuild();
