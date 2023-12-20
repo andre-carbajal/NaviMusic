@@ -41,6 +41,6 @@ public class Skip implements ICommand {
         embed.setTitle("Skip Command");
         embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
-        event.replyEmbeds(embed.setDescription("Skipped").build()).queue();
+        event.replyEmbeds(embed.setDescription("The song was skipped").build()).queue();
     }
 }

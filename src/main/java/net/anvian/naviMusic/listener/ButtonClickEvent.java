@@ -63,6 +63,8 @@ public class ButtonClickEvent extends ListenerAdapter {
     }
 
     private void updateEmbedWithCurrentPage(EmbedBuilder embedBuilder, List<AudioTrack> queue, int currentPage) {
+        embedBuilder.setTitle("Current Queue");
+
         int startIndex = currentPage * 10;
         int endIndex = Math.min(startIndex + 10, queue.size());
 

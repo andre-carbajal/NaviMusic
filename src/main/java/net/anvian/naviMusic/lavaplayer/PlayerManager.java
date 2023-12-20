@@ -50,13 +50,13 @@ public class PlayerManager {
             @Override
             public void trackLoaded(AudioTrack track) {
                 guildMusicManager.getTrackScheduler().queue(track);
-                event.replyEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.addField("Song added to queue: ", songTitle, false).build()).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 guildMusicManager.getTrackScheduler().queue(playlist.getTracks().get(0));
-                event.replyEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.addField("Song added to queue: ", songTitle, false).build()).queue();
             }
 
             @Override
@@ -87,8 +87,7 @@ public class PlayerManager {
                 for (AudioTrack track : playlist.getTracks()) {
                     musicManager.getTrackScheduler().queue(track);
                 }
-                event.deferReply().queue();
-                event.getHook().editOriginalEmbeds(embedBuilder.setDescription("Playing: " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.addField("Playlist added to queue: ", songTitle, false).build()).queue();
             }
 
             @Override

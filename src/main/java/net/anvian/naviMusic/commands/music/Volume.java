@@ -49,11 +49,11 @@ public class Volume implements ICommand {
         embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
         if ((volume < 0 || volume > 100) && volume != 500) {
-            event.getHook().editOriginalEmbeds(embed.setDescription("Volume must be between 0 and 100").build()).queue();
+            event.replyEmbeds(embed.setDescription("Volume must be between 0 and 100").build()).queue();
             return;
         }
 
         player.setVolume(volume);
-        event.getHook().editOriginalEmbeds(embed.setDescription("Volume set to `" + volume + "`").build()).queue();
+        event.replyEmbeds(embed.setDescription("Volume set to `" + volume + "`").build()).queue();
     }
 }
