@@ -10,6 +10,7 @@ public class CommandInitializer {
         manager.add(new Help(manager));
 
         manager.add(new Play());
+        manager.add(new PlayFromFile());
         manager.add(new NowPlaying());
         manager.add(new Repeat());
 
