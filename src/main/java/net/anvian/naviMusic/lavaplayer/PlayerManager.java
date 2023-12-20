@@ -85,11 +85,10 @@ public class PlayerManager {
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
-                int songCount = playlist.getTracks().size();
                 for (AudioTrack track : playlist.getTracks()) {
                     musicManager.getTrackScheduler().queue(track);
                 }
-                event.replyEmbeds(playlistInformation(trackUrl, songCount, embedBuilder).build()).queue();
+                event.replyEmbeds(playlistInformation(trackUrl, playlist.getTracks().size(), embedBuilder).build()).queue();
             }
 
             @Override
@@ -106,17 +105,18 @@ public class PlayerManager {
 
     private EmbedBuilder trackInformation(AudioTrack track, EmbedBuilder embedBuilder) {
         AudioTrackInfo info = track.getInfo();
-        embedBuilder.setDescription("Song added to queue:\n");
-        embedBuilder.appendDescription("**Name:** `" + info.title + "`\n");
-        embedBuilder.appendDescription("**Author:** `" + info.author + "`\n");
-        embedBuilder.appendDescription("**URL:** `" + info.uri + "`\n");
+        embedBuilder.setDescription("Song added to queue:");
+        embedBuilder.appendDescription("\n**Name:** `" + info.title + "`");
+        embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
+        embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
+        embedBuilder.appendDescription("\n**Duration:** `" + info.length / 60000 + ":" + info.length % 60000 / 1000 + "`");
         return embedBuilder;
     }
 
     private EmbedBuilder playlistInformation(String trackUrl, int songCount, EmbedBuilder embedBuilder) {
-        embedBuilder.setDescription("Playlist added to queue:\n");
-        embedBuilder.appendDescription("**URL:** `" + trackUrl + "`\n");
-        embedBuilder.appendDescription("**Songs added to queue:** `" + songCount + "`\n");
+        embedBuilder.setDescription("\nPlaylist added to queue:");
+        embedBuilder.appendDescription("\n**URL:** `" + trackUrl + "`");
+        embedBuilder.appendDescription("\n**Songs added to queue:** `" + songCount + "`");
         return embedBuilder;
     }
 }
