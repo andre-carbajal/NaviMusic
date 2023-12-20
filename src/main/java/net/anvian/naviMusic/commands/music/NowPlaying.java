@@ -54,7 +54,7 @@ public class NowPlaying implements ICommand {
         embedBuilder.setDescription("**Name:** `" + info.title + "`");
         embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
         embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
-        embedBuilder.appendDescription("\n**Duration:** `" + info.length / 60000 + ":" + info.length % 60000 / 1000 + "`");
+        embedBuilder.appendDescription("\n**Duration:** `" + info.length / 60000 + ":" + String.format("%02d", info.length % 60000 / 1000) + "`");
         return embedBuilder;
     }
 }
