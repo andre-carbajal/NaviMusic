@@ -31,7 +31,7 @@ public class VoiceChannelManager {
 
     public void scheduleDisconnect(JDA jda) {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(() -> disconnectBot(jda), 0, 5, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(() -> disconnectBot(jda), 0, 3, TimeUnit.MINUTES);
     }
 
 }
