@@ -18,6 +18,7 @@ public class CommandInitializer {
         manager.add(new Remove());
         manager.add(new Clear());
         manager.add(new Shuffle());
+        manager.add(new RepeatQueue());
 
         manager.add(new Skip());
         manager.add(new Stop());

@@ -11,15 +11,15 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.List;
 
-public class Repeat implements ICommand {
+public class RepeatQueue implements ICommand {
     @Override
     public String getName() {
-        return "repeat";
+        return "repeatqueue";
     }
 
     @Override
     public String getDescription() {
-        return "The song that is playing will be repeated";
+        return "Repeats the queue";
     }
 
     @Override
@@ -35,13 +35,13 @@ public class Repeat implements ICommand {
         if (!CommandUtils.validateVoiceState(event, member, self)) return;
 
         GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
-        boolean isRepeat = !guildMusicManager.getTrackScheduler().isRepeat();
-        guildMusicManager.getTrackScheduler().setRepeat(isRepeat);
+        boolean isRepeatQueue = !guildMusicManager.getTrackScheduler().isRepeatQueue();
+        guildMusicManager.getTrackScheduler().setRepeatQueue(isRepeatQueue);
 
         EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Repeat Command");
+        embed.setTitle("Repeat Queue Command");
         embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
-        event.replyEmbeds(embed.setDescription("Repeat is now " + isRepeat).build()).queue();
+        event.replyEmbeds(embed.setDescription("Repeat queue is now " + isRepeatQueue).build()).queue();
     }
 }
