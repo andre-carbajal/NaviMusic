@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -41,7 +42,7 @@ public class PlayerManager {
         });
     }
 
-    public void play(Guild guild, String trackURL, SlashCommandInteractionEvent event, String songTitle) {
+    public void play(Guild guild, String trackURL, SlashCommandInteractionEvent event) {
         GuildMusicManager guildMusicManager = getGuildMusicManager(guild);
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Play Command");
@@ -50,28 +51,28 @@ public class PlayerManager {
             @Override
             public void trackLoaded(AudioTrack track) {
                 guildMusicManager.getTrackScheduler().queue(track);
-                event.replyEmbeds(embedBuilder.addField("Song added to queue: ", songTitle, false).build()).queue();
+                event.replyEmbeds(trackInformation(track, embedBuilder).build()).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 guildMusicManager.getTrackScheduler().queue(playlist.getTracks().get(0));
-                event.replyEmbeds(embedBuilder.addField("Song added to queue: ", songTitle, false).build()).queue();
+                event.replyEmbeds(trackInformation(playlist.getTracks().get(0), embedBuilder).build()).queue();
             }
 
             @Override
             public void noMatches() {
-                event.replyEmbeds(embedBuilder.setDescription("No matches found for " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.setDescription("No matches found for the song").build()).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException exception) {
-                event.replyEmbeds(embedBuilder.setDescription("Could not play: " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.setDescription("Could not play the song").build()).queue();
             }
         });
     }
 
-    public void loadAndPlayPlaylist(final Guild guild, final String trackUrl, SlashCommandInteractionEvent event, String songTitle) {
+    public void loadAndPlayPlaylist(final Guild guild, final String trackUrl, SlashCommandInteractionEvent event) {
         GuildMusicManager musicManager = getGuildMusicManager(guild);
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Play Command");
@@ -79,26 +80,43 @@ public class PlayerManager {
         audioPlayerManager.loadItemOrdered(guild, trackUrl, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                System.out.println(track);
+                System.out.println(track.getInfo().title);
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
+                int songCount = playlist.getTracks().size();
                 for (AudioTrack track : playlist.getTracks()) {
                     musicManager.getTrackScheduler().queue(track);
                 }
-                event.replyEmbeds(embedBuilder.addField("Playlist added to queue: ", songTitle, false).build()).queue();
+                event.replyEmbeds(playlistInformation(trackUrl, songCount, embedBuilder).build()).queue();
             }
 
             @Override
             public void noMatches() {
-                event.replyEmbeds(embedBuilder.setDescription("No matches found for " + songTitle).build()).queue();
+                event.replyEmbeds(embedBuilder.setDescription("No matches found for the playlist").build()).queue();
             }
 
             @Override
-            public void loadFailed(FriendlyException throwable) {
-                event.replyEmbeds(embedBuilder.setDescription("Could not play: " + songTitle).build()).queue();
+            public void loadFailed(FriendlyException exception) {
+                event.replyEmbeds(embedBuilder.setDescription("Could not play the playlist").build()).queue();
             }
         });
+    }
+
+    private EmbedBuilder trackInformation(AudioTrack track, EmbedBuilder embedBuilder) {
+        AudioTrackInfo info = track.getInfo();
+        embedBuilder.setDescription("Song added to queue:\n");
+        embedBuilder.appendDescription("**Name:** `" + info.title + "`\n");
+        embedBuilder.appendDescription("**Author:** `" + info.author + "`\n");
+        embedBuilder.appendDescription("**URL:** `" + info.uri + "`\n");
+        return embedBuilder;
+    }
+
+    private EmbedBuilder playlistInformation(String trackUrl, int songCount, EmbedBuilder embedBuilder) {
+        embedBuilder.setDescription("Playlist added to queue:\n");
+        embedBuilder.appendDescription("**URL:** `" + trackUrl + "`\n");
+        embedBuilder.appendDescription("**Songs added to queue:** `" + songCount + "`\n");
+        return embedBuilder;
     }
 }

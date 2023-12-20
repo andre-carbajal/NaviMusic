@@ -55,7 +55,6 @@ public class Play implements ICommand {
         }
 
         String name = event.getOption("name-url-playlist").getAsString();
-        String songTitle = name;
         try {
             URI uri = new URI(name);
             if (uri.getHost() == null) {
@@ -68,9 +67,9 @@ public class Play implements ICommand {
         PlayerManager playerManager = PlayerManager.get();
 
         if (name.contains("youtube.com/playlist?list=")) {
-            playerManager.loadAndPlayPlaylist(event.getGuild(), name, event, songTitle);
+            playerManager.loadAndPlayPlaylist(event.getGuild(), name, event);
         } else {
-            playerManager.play(event.getGuild(), name, event, songTitle);
+            playerManager.play(event.getGuild(), name, event);
         }
     }
 }
