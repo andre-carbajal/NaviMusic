@@ -3,7 +3,6 @@ package net.anvian.naviMusic;
 import dev.arbjerg.lavalink.client.*;
 import net.anvian.naviMusic.commands.CommandManager;
 import net.anvian.naviMusic.listener.CommandInitializer;
-import net.anvian.naviMusic.manager.GUIManager;
 import net.anvian.naviMusic.manager.TokenManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -18,12 +17,9 @@ import java.util.List;
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static final TokenManager tokenManager = new TokenManager();
-    private static final GUIManager guiManager = new GUIManager();
     private static final CommandInitializer commandInitializer = new CommandInitializer();
 
     public static void main(String[] args) {
-        guiManager.checkGui(getGuiOption(args));
-
         String token = tokenManager.getToken(args);
 
         final LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
