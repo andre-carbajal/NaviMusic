@@ -89,17 +89,15 @@ public class Main {
                                 .setPassword("youshallnotpass")
                                 .build()
                 )
-        ).forEach((node) -> {
-            node.on(TrackStartEvent.class).subscribe((event) -> {
-                final LavalinkNode node1 = event.getNode();
+        ).forEach((node) -> node.on(TrackStartEvent.class).subscribe((event) -> {
+            final LavalinkNode node1 = event.getNode();
 
-                LOG.info(
-                        "{}: track started: {}",
-                        node1.getName(),
-                        event.getTrack().getInfo()
-                );
-            });
-        });
+            LOG.info(
+                    "{}: track started: {}",
+                    node1.getName(),
+                    event.getTrack().getInfo()
+            );
+        }));
     }
 
     private static String getGuiOption(String[] args) {
