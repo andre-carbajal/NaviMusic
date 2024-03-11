@@ -1,9 +1,7 @@
 # Release Notes
 
-### New Features
-
-- Release noted was added
-
 ## Improvements
+- Dependency updates
 
-- The dependencies were upgraded
+## Bug Fixes
+- The problem with music playback in the bot has been solved.
