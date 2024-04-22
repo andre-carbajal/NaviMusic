@@ -16,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class JDAListener extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
     private final LavalinkClient client;
@@ -113,9 +116,18 @@ public class JDAListener extends ListenerAdapter {
                     joinHelper(event);
                 }
 
-                final String identifier = event.getOption("identifier").getAsString();
                 final long guildId = guild.getIdLong();
                 final Link link = this.client.getOrCreateLink(guildId);
+                String identifier = event.getOption("identifier").getAsString();
+
+                try {
+                    URI uri = new URI(identifier);
+                    if (uri.getHost() == null) {
+                        identifier = "ytsearch:" + identifier;
+                    }
+                }catch (URISyntaxException e){
+                    identifier = "ytsearch:" + identifier;
+                }
 
                 link.loadItem(identifier).subscribe(new AudioLoader(link, event));
 
