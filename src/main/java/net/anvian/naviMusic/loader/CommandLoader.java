@@ -11,6 +11,7 @@ import net.anvian.naviMusic.command.music.Stop;
 
 public class CommandLoader {
     private final LavalinkClient client;
+
     public CommandLoader(LavalinkClient client) {
         this.client = client;
     }

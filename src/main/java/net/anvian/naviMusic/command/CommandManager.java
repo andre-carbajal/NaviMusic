@@ -16,17 +16,18 @@ public class CommandManager extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(CommandManager.class);
     private final LavalinkClient client;
     private final List<ICommand> commands = new ArrayList<>();
+
     public CommandManager(LavalinkClient client) {
         this.client = client;
     }
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        LOG.info(event.getJDA().getSelfUser().getAsTag() + " is ready!");
+        LOG.info("{} is ready!", event.getJDA().getSelfUser().getAsTag());
 
-        for(Guild guild : event.getJDA().getGuilds()) {
-            for(ICommand command : commands) {
-                if(command.getOptions() == null) {
+        for (Guild guild : event.getJDA().getGuilds()) {
+            for (ICommand command : commands) {
+                if (command.getOptions() == null) {
                     guild.upsertCommand(command.getName(), command.getDescription()).queue();
                 } else {
                     guild.upsertCommand(command.getName(), command.getDescription()).addOptions(command.getOptions()).queue();
@@ -39,8 +40,8 @@ public class CommandManager extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
 
-        for(ICommand command : commands) {
-            if(command.getName().equals(event.getName())) {
+        for (ICommand command : commands) {
+            if (command.getName().equals(event.getName())) {
                 command.execute(event, this.client, guild);
                 return;
             }
@@ -49,9 +50,5 @@ public class CommandManager extends ListenerAdapter {
 
     public void add(ICommand command) {
         commands.add(command);
-    }
-
-    public List<ICommand> getCommands() {
-        return commands;
     }
 }

@@ -50,7 +50,7 @@ public class Play implements ICommand {
             if (uri.getHost() == null) {
                 identifier = "ytsearch:" + identifier;
             }
-        }catch (URISyntaxException e){
+        } catch (URISyntaxException e) {
             identifier = "ytsearch:" + identifier;
         }
 

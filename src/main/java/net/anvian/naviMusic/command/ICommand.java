@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface ICommand {
     String getName();
+
     String getDescription();
+
     List<OptionData> getOptions();
+
     void execute(SlashCommandInteractionEvent event, LavalinkClient client, Guild guild);
 }

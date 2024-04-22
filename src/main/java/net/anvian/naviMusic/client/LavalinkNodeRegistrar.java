@@ -11,6 +11,7 @@ import java.util.List;
 
 public class LavalinkNodeRegistrar {
     private static final Logger LOG = LoggerFactory.getLogger(LavalinkNodeRegistrar.class);
+
     public static void registerNodes(LavalinkClient client) {
         List.of(
                 client.addNode(

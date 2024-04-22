@@ -26,24 +26,19 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
 
         track.setUserData(userData);
 
-        link.createOrUpdatePlayer()
-                .setTrack(track)
-                .setVolume(35)
-                .subscribe((player) -> {
-                    final Track playingTrack = player.getTrack();
-                    final var trackTitle = playingTrack.getInfo().getTitle();
-                    final MyUserData customData = playingTrack.getUserData(MyUserData.class);
+        link.createOrUpdatePlayer().setTrack(track).setVolume(35).subscribe((player) -> {
+            final Track playingTrack = player.getTrack();
+            final var trackTitle = playingTrack.getInfo().getTitle();
+            final MyUserData customData = playingTrack.getUserData(MyUserData.class);
 
-                    event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
-                });
+            event.getHook().sendMessage("Now playing: " + trackTitle + "\nRequested by: <@" + customData.requester() + '>').queue();
+        });
     }
 
     @Override
     public void onPlaylistLoaded(@NotNull PlaylistLoaded result) {
         final int trackCount = result.getTracks().size();
-        event.getHook()
-                .sendMessage("This playlist has " + trackCount + " tracks!")
-                .queue();
+        event.getHook().sendMessage("This playlist has " + trackCount + " tracks!").queue();
     }
 
     @Override
@@ -57,10 +52,9 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
 
         final Track firstTrack = tracks.get(0);
 
-        link.updatePlayer((update) -> update.setTrack(firstTrack).setVolume(35))
-                .subscribe((ignored) -> {
-                    event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
-                });
+        link.updatePlayer((update) -> update.setTrack(firstTrack).setVolume(35)).subscribe((ignored) -> {
+            event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();
+        });
     }
 
     @Override

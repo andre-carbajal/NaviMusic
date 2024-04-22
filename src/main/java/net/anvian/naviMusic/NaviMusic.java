@@ -1,24 +1,19 @@
 package net.anvian.naviMusic;
 
-import com.sun.tools.javac.Main;
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.event.WebSocketClosedEvent;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.anvian.naviMusic.client.LavalinkClientFactory;
 import net.anvian.naviMusic.client.LavalinkNodeRegistrar;
 import net.anvian.naviMusic.client.event.LavalinkEventListener;
-import net.anvian.naviMusic.command.CommandManager;
 import net.anvian.naviMusic.loader.CommandLoader;
 import net.anvian.naviMusic.manager.TokenManager;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NaviMusic {
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private static final TokenManager tokenManager = new TokenManager();
 
     private static final int SESSION_INVALID = 4006;
