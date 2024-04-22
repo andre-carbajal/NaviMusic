@@ -7,7 +7,8 @@ import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.anvian.naviMusic.client.LavalinkClientFactory;
 import net.anvian.naviMusic.client.LavalinkNodeRegistrar;
 import net.anvian.naviMusic.client.event.LavalinkEventListener;
-import net.anvian.naviMusic.listener.JDAListener;
+import net.anvian.naviMusic.command.CommandManager;
+import net.anvian.naviMusic.loader.CommandLoader;
 import net.anvian.naviMusic.manager.TokenManager;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -25,6 +26,7 @@ public class NaviMusic {
     public static void main(String[] args) throws InterruptedException {
         final var token = tokenManager.getToken(args);
         final LavalinkClient client = LavalinkClientFactory.createClient(token);
+        final CommandLoader commandInitializer = new CommandLoader(client);
 
         LavalinkNodeRegistrar.registerNodes(client);
         LavalinkEventListener.registerListeners(client);
@@ -34,7 +36,7 @@ public class NaviMusic {
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
-                .addEventListeners(new JDAListener(client))
+                .addEventListeners(commandInitializer.initialize())
                 .build()
                 .awaitReady();
 
