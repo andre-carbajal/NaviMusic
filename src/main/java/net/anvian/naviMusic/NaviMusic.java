@@ -40,7 +40,6 @@ public class NaviMusic {
                 .build()
                 .awaitReady();
 
-        // Got a lot of 4006 closecodes? Try this "fix"
         client.on(WebSocketClosedEvent.class).subscribe((event) -> {
             if (event.getCode() == SESSION_INVALID) {
                 final var guildId = event.getGuildId();
@@ -52,7 +51,6 @@ public class NaviMusic {
 
                 final var connectedChannel = guild.getSelfMember().getVoiceState().getChannel();
 
-                // somehow
                 if (connectedChannel == null) {
                     return;
                 }
