@@ -1,7 +1,9 @@
-package net.anvian.naviMusic;
+package net.anvian.naviMusic.listener;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
+import net.anvian.naviMusic.MyUserData;
+import net.anvian.naviMusic.loader.AudioLoader;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -16,9 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class JDAListener extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
-
     private final LavalinkClient client;
-
     public JDAListener(LavalinkClient client) {
         this.client = client;
     }
@@ -107,11 +107,9 @@ public class JDAListener extends ListenerAdapter {
                         });
                 break;
             case "play": {
-                // We are already connected, go ahead and play
                 if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
                     event.deferReply(false).queue();
                 } else {
-                    // Connect to VC first
                     joinHelper(event);
                 }
 
@@ -129,7 +127,6 @@ public class JDAListener extends ListenerAdapter {
         }
     }
 
-    // Makes sure that the bot is in a voice channel!
     private void joinHelper(SlashCommandInteractionEvent event) {
         final Member member = event.getMember();
         final GuildVoiceState memberVoiceState = member.getVoiceState();

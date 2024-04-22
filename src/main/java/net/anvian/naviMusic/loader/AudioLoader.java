@@ -1,8 +1,9 @@
-package net.anvian.naviMusic;
+package net.anvian.naviMusic.loader;
 
 import dev.arbjerg.lavalink.client.AbstractAudioLoadResultHandler;
 import dev.arbjerg.lavalink.client.Link;
 import dev.arbjerg.lavalink.client.player.*;
+import net.anvian.naviMusic.MyUserData;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,8 +57,6 @@ public class AudioLoader extends AbstractAudioLoadResultHandler {
 
         final Track firstTrack = tracks.get(0);
 
-        // This is a different way of updating the player! Choose your preference!
-        // This method will also create a player if there is not one in the server yet
         link.updatePlayer((update) -> update.setTrack(firstTrack).setVolume(35))
                 .subscribe((ignored) -> {
                     event.getHook().sendMessage("Now playing: " + firstTrack.getInfo().getTitle()).queue();

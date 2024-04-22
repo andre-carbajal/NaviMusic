@@ -1,21 +1,20 @@
 package net.anvian.naviMusic;
 
 import com.sun.tools.javac.Main;
-import dev.arbjerg.lavalink.client.Helpers;
 import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.LavalinkNode;
-import dev.arbjerg.lavalink.client.NodeOptions;
-import dev.arbjerg.lavalink.client.event.*;
-import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
+import dev.arbjerg.lavalink.client.event.WebSocketClosedEvent;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
+import net.anvian.naviMusic.client.LavalinkClientFactory;
+import net.anvian.naviMusic.client.LavalinkNodeRegistrar;
+import net.anvian.naviMusic.client.event.LavalinkEventListener;
+import net.anvian.naviMusic.listener.JDAListener;
 import net.anvian.naviMusic.manager.TokenManager;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class NaviMusic {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
@@ -25,14 +24,13 @@ public class NaviMusic {
 
     public static void main(String[] args) throws InterruptedException {
         final var token = tokenManager.getToken(args);
-        final LavalinkClient client = new LavalinkClient(Helpers.getUserIdFromToken(token));
+        final LavalinkClient client = LavalinkClientFactory.createClient(token);
 
-        client.getLoadBalancer().addPenaltyProvider(new VoiceRegionPenaltyProvider());
-
-        registerLavalinkListeners(client);
-        registerLavalinkNodes(client);
+        LavalinkNodeRegistrar.registerNodes(client);
+        LavalinkEventListener.registerListeners(client);
 
         final var jda = JDABuilder.createDefault(token)
+                .setActivity(Activity.customStatus("Waiting for the music"))
                 .setVoiceDispatchInterceptor(new JDAVoiceUpdateListener(client))
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
@@ -57,67 +55,6 @@ public class NaviMusic {
 
                 jda.getDirectAudioController().reconnect(connectedChannel);
             }
-        });
-    }
-
-
-    private static void registerLavalinkNodes(LavalinkClient client) {
-        List.of(
-                client.addNode(
-                        new NodeOptions.Builder()
-                                .setName("DevelopNode")
-                                .setServerUri("ws://localhost:2333")
-                                .setPassword("youshallnotpass")
-                                .build()
-                )
-        ).forEach((node) -> {
-            node.on(TrackStartEvent.class).subscribe((event) -> {
-                final LavalinkNode node1 = event.getNode();
-
-                LOG.info(
-                        "{}: track started: {}",
-                        node1.getName(),
-                        event.getTrack().getInfo()
-                );
-            });
-        });
-    }
-
-    private static void registerLavalinkListeners(LavalinkClient client) {
-        client.on(ReadyEvent.class).subscribe((event) -> {
-            final LavalinkNode node = event.getNode();
-
-            LOG.info(
-                    "Node '{}' is ready, session id is '{}'!",
-                    node.getName(),
-                    event.getSessionId()
-            );
-        });
-
-        client.on(StatsEvent.class).subscribe((event) -> {
-            final LavalinkNode node = event.getNode();
-
-            LOG.info(
-                    "Node '{}' has stats, current players: {}/{} (link count {})",
-                    node.getName(),
-                    event.getPlayingPlayers(),
-                    event.getPlayers(),
-                    client.getLinks().size()
-            );
-        });
-
-        client.on(EmittedEvent.class).subscribe((event) -> {
-            if (event instanceof TrackStartEvent) {
-                LOG.info("Is a track start event!");
-            }
-
-            final var node = event.getNode();
-
-            LOG.info(
-                    "Node '{}' emitted event: {}",
-                    node.getName(),
-                    event
-            );
         });
     }
 }
