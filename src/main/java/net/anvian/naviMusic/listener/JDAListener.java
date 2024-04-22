@@ -30,11 +30,11 @@ public class JDAListener extends ListenerAdapter {
         event.getJDA().updateCommands()
                 .addCommands(
                         Commands.slash("join", "Join the voice channel you are in."),
-                        Commands.slash("leave", "Leaves the vc"),
+                        Commands.slash("leave", "Leaves the voice channel"),
                         Commands.slash("stop", "Stops the current track"),
                         Commands.slash("pause", "Pause or unpause the player"),
-                        Commands.slash("now-playing", "Shows what is currently playing"),
-                        Commands.slash("play", "Play a song")
+                        Commands.slash("nowplaying", "Will display the current playing song"),
+                        Commands.slash("play", "Will play a song")
                                 .addOption(
                                         OptionType.STRING,
                                         "identifier",
@@ -70,7 +70,7 @@ public class JDAListener extends ListenerAdapter {
                 event.getJDA().getDirectAudioController().disconnect(guild);
                 event.reply("Leaving your channel!").queue();
                 break;
-            case "now-playing": {
+            case "nowplaying": {
                 final var link = this.client.getOrCreateLink(guild.getIdLong());
                 final var player = link.getCachedPlayer();
 
