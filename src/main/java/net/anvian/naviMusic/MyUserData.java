@@ -1,3 +1,4 @@
 package net.anvian.naviMusic;
 
-public record MyUserData(long requester) { }
+public record MyUserData(long requester) {
+}

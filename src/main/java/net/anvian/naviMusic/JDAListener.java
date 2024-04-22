@@ -2,8 +2,6 @@ package net.anvian.naviMusic;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.Link;
-import dev.arbjerg.lavalink.client.player.FilterBuilder;
-import dev.arbjerg.lavalink.protocol.v4.Karaoke;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -12,13 +10,9 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class JDAListener extends ListenerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JDAListener.class);
@@ -35,7 +29,6 @@ public class JDAListener extends ListenerAdapter {
 
         event.getJDA().updateCommands()
                 .addCommands(
-                        Commands.slash("custom-request", "Testing custom requests"),
                         Commands.slash("join", "Join the voice channel you are in."),
                         Commands.slash("leave", "Leaves the vc"),
                         Commands.slash("stop", "Stops the current track"),
@@ -47,11 +40,6 @@ public class JDAListener extends ListenerAdapter {
                                         "identifier",
                                         "The identifier of the song you want to play",
                                         true
-                                ),
-                        Commands.slash("karaoke", "Turn karaoke on or off")
-                                .addSubcommands(
-                                        new SubcommandData("on", "Turn karaoke on"),
-                                        new SubcommandData("off", "Turn karaoke on")
                                 )
                 )
                 .queue();
@@ -118,36 +106,6 @@ public class JDAListener extends ListenerAdapter {
                             event.reply("Player has been " + (player.getPaused() ? "paused" : "resumed") + "!").queue();
                         });
                 break;
-            case "karaoke on": {
-                final long guildId = guild.getIdLong();
-                final Link link = this.client.getOrCreateLink(guildId);
-
-                link.createOrUpdatePlayer()
-                        .setFilters(
-                                new FilterBuilder()
-                                        .setKaraoke(
-                                                new Karaoke()
-                                        )
-                                        .build()
-                        )
-                        .subscribe();
-                event.reply("turning karaoke on!").queue();
-                break;
-            }
-            case "karaoke off": {
-                final long guildId = guild.getIdLong();
-                final Link link = this.client.getOrCreateLink(guildId);
-
-                link.createOrUpdatePlayer()
-                        .setFilters(
-                                new FilterBuilder()
-                                        .setKaraoke(null)
-                                        .build()
-                        )
-                        .subscribe();
-                event.reply("turning karaoke off!").queue();
-                break;
-            }
             case "play": {
                 // We are already connected, go ahead and play
                 if (guild.getSelfMember().getVoiceState().inAudioChannel()) {
@@ -163,22 +121,6 @@ public class JDAListener extends ListenerAdapter {
 
                 link.loadItem(identifier).subscribe(new AudioLoader(link, event));
 
-                break;
-            }
-            case "custom-request": {
-                final Link link = this.client.getOrCreateLink(guild.getIdLong());
-
-                link.getNode().customRequest(
-                        (builder) -> builder.get().path("/version").header("Accept", "text/plain")
-                ).subscribe((response) -> {
-                    try (ResponseBody body = response.body()) {
-                        final String bodyText = body.string();
-
-                        event.reply("Response from version endpoint (with custom request): " + bodyText).queue();
-                    } catch (IOException e) {
-                        event.reply("Something went wrong! " + e.getMessage()).queue();
-                    }
-                });
                 break;
             }
             default:

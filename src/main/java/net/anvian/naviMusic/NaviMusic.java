@@ -6,7 +6,6 @@ import dev.arbjerg.lavalink.client.LavalinkClient;
 import dev.arbjerg.lavalink.client.LavalinkNode;
 import dev.arbjerg.lavalink.client.NodeOptions;
 import dev.arbjerg.lavalink.client.event.*;
-import dev.arbjerg.lavalink.client.loadbalancing.RegionGroup;
 import dev.arbjerg.lavalink.client.loadbalancing.builtin.VoiceRegionPenaltyProvider;
 import dev.arbjerg.lavalink.libraries.jda.JDAVoiceUpdateListener;
 import net.anvian.naviMusic.manager.TokenManager;
@@ -71,15 +70,6 @@ public class NaviMusic {
                                 .setName("DevelopNode")
                                 .setServerUri("ws://localhost:2333")
                                 .setPassword("youshallnotpass")
-                                .build()
-                ),
-
-                client.addNode(
-                        new NodeOptions.Builder()
-                                .setName("Pi-local")
-                                .setServerUri("ws://pi.local.duncte123.lgbt:2333/bepis")
-                                .setPassword("youshallnotpass")
-                                .setRegionFilter(RegionGroup.US)
                                 .build()
                 )
         ).forEach((node) -> {
