@@ -12,7 +12,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>net.anvian.naviMusic.Main</mainClass>
+        <mainClass>net.anvian.naviMusic.NaviMusic</mainClass>
     </properties>
 
     <repositories>
@@ -28,19 +28,19 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.16.1</version>
+            <version>2.17.0</version>
         </dependency>
         <!--JDA-->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.20</version>
+            <version>5.0.0-beta.23</version>
         </dependency>
         <!--Lavalink-Client-->
         <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavalink-client</artifactId>
-            <version>2.4.1</version>
+            <version>3.0.0</version>
         </dependency>
 
 
