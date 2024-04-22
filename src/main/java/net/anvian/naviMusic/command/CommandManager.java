@@ -23,7 +23,7 @@ public class CommandManager extends ListenerAdapter {
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
-        LOG.info("{} is ready!", event.getJDA().getSelfUser().getAsTag());
+        LOG.info("{} is ready!", event.getJDA().getSelfUser().getName());
 
         for (Guild guild : event.getJDA().getGuilds()) {
             for (ICommand command : commands) {
