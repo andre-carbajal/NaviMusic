@@ -2,6 +2,7 @@ package net.anvian.naviMusic.loader;
 
 import dev.arbjerg.lavalink.client.LavalinkClient;
 import net.anvian.naviMusic.command.CommandManager;
+import net.anvian.naviMusic.command.general.Help;
 import net.anvian.naviMusic.command.general.Join;
 import net.anvian.naviMusic.command.general.Leave;
 import net.anvian.naviMusic.command.music.Nowplaying;
@@ -18,6 +19,8 @@ public class CommandLoader {
 
     public CommandManager initialize() {
         CommandManager manager = new CommandManager(client);
+        manager.add(new Help(manager));
+
         manager.add(new Join());
         manager.add(new Leave());
 
