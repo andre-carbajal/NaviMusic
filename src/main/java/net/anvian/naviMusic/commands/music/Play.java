@@ -58,10 +58,10 @@ public class Play implements ICommand {
         try {
             URI uri = new URI(name);
             if (uri.getHost() == null) {
-                name = "ytsearch:" + name;
+                name = "ytmsearch:" + name;
             }
         }catch (URISyntaxException e){
-            name = "ytsearch:" + name;
+            name = "ytmsearch:" + name;
         }
 
         PlayerManager playerManager = PlayerManager.get();
