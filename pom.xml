@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.anvian</groupId>
+    <groupId>net.andrecarbajal</groupId>
     <artifactId>NaviMusic</artifactId>
-    <version>1.14.1</version>
+    <version>1.14.2</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>net.anvian.naviMusic.Main</mainClass>
+        <mainClass>net.andrecarbajal.naviMusic.Main</mainClass>
     </properties>
 
     <repositories>
