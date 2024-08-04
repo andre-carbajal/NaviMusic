@@ -1,15 +1,15 @@
 package net.andrecarbajal.naviMusic.commands.music;
 
-import net.andrecarbajal.naviMusic.commands.CommandUtils;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
+import net.andrecarbajal.naviMusic.audio.GuildAudioManager;
 import net.andrecarbajal.naviMusic.commands.ICommand;
-import net.andrecarbajal.naviMusic.lavaplayer.AudioForwarder;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.managers.AudioManager;
-
-import java.util.List;
+import net.andrecarbajal.naviMusic.util.EmbedCreator;
+import reactor.core.publisher.Mono;
 
 public class Continue implements ICommand {
     @Override
@@ -18,38 +18,38 @@ public class Continue implements ICommand {
     }
 
     @Override
+    public String getCategory() {
+        return "Music";
+    }
+
+    @Override
     public String getDescription() {
-        return "Continue the song if it is paused";
+        return "Continues the music";
     }
 
     @Override
-    public List<OptionData> getOptions() {
-        return null;
-    }
+    public Mono<Void> handle(ChatInputInteractionEvent event) {
+        Member member = event.getInteraction().getMember().get();
 
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        AudioManager audioManager = event.getGuild().getAudioManager();
-        AudioForwarder forwarder = (AudioForwarder) audioManager.getSendingHandler();
+        return member.getVoiceState()
+                .flatMap(VoiceState::getChannel)
+                .flatMap(voiceChannel -> voiceChannel.isMemberConnected(event.getClient().getSelfId()))
+                .defaultIfEmpty(false)
+                .flatMap(isConnected -> {
+                    EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Continue Command");
+                    if (isConnected) {
+                        Snowflake guildId = event.getInteraction().getGuildId().orElse(Snowflake.of(0));
+                        AudioPlayer player = GuildAudioManager.of(guildId).getPlayer();
 
-        Member member = event.getMember();
-        Member self = event.getGuild().getSelfMember();
+                        if (!player.isPaused())
+                            return event.reply().withEmbeds(embed.description("The music is already playing!").build());
 
-        if (!CommandUtils.validateVoiceState(event, member, self)) return;
+                        player.setPaused(false);
+                        return event.reply().withEmbeds(embed.description("The music is now playing!").build());
 
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Continue Command");
-        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
-
-        if (forwarder != null) {
-            if (!forwarder.getAudioPlayer().isPaused()) {
-                event.replyEmbeds(embed.setDescription("The current song is already playing").build()).queue();
-                return;
-            }
-            forwarder.getAudioPlayer().setPaused(false);
-            event.replyEmbeds(embed.setDescription("Continued the current song").build()).queue();
-        } else {
-            event.replyEmbeds(embed.setDescription("No song is currently playing").build()).queue();
-        }
+                    }
+                    return event.reply().withEmbeds(
+                            embed.description("You need to be in a voice channel with the bot to use this command!").build());
+                });
     }
 }

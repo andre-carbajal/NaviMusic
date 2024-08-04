@@ -1,18 +1,15 @@
 package net.andrecarbajal.naviMusic.commands.music;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.andrecarbajal.naviMusic.commands.CommandUtils;
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
+import net.andrecarbajal.naviMusic.audio.GuildAudioManager;
+import net.andrecarbajal.naviMusic.audio.TrackScheduler;
 import net.andrecarbajal.naviMusic.commands.ICommand;
-import net.andrecarbajal.naviMusic.lavaplayer.GuildMusicManager;
-import net.andrecarbajal.naviMusic.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import net.andrecarbajal.naviMusic.util.EmbedCreator;
+import reactor.core.publisher.Mono;
 
 public class Shuffle implements ICommand {
     @Override
@@ -21,36 +18,33 @@ public class Shuffle implements ICommand {
     }
 
     @Override
+    public String getCategory() {
+        return "Music";
+    }
+
+    @Override
     public String getDescription() {
         return "Shuffles the queue";
     }
 
     @Override
-    public List<OptionData> getOptions() {
-        return null;
-    }
+    public Mono<Void> handle(ChatInputInteractionEvent event) {
+        Member member = event.getInteraction().getMember().get();
+        EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Shuffle Command");
 
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        Member member = event.getMember();
-        Member self = event.getGuild().getSelfMember();
+        return member.getVoiceState()
+                .flatMap(VoiceState::getChannel)
+                .flatMap(voiceChannel -> voiceChannel.isMemberConnected(event.getClient().getSelfId()))
+                .defaultIfEmpty(false)
+                .flatMap(isConnected -> {
+                    if (isConnected) {
+                        Snowflake guildId = event.getInteraction().getGuildId().orElse(Snowflake.of(0));
+                        TrackScheduler scheduler = GuildAudioManager.of(guildId).getScheduler();
+                        scheduler.shuffle();
+                        return event.reply().withEmbeds(embed.description("Queue shuffled!").build());
+                    }
 
-        if (!CommandUtils.validateVoiceState(event, member, self)) return;
-
-        GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
-        List<AudioTrack> queue = new ArrayList<>(guildMusicManager.getTrackScheduler().getQueue());
-
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Shuffle Command");
-        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
-
-        if(queue.isEmpty()) {
-            event.replyEmbeds(embed.setDescription("An empty list cannot be shuffled").build()).queue();
-            return;
-        }
-
-        Collections.shuffle(queue);
-        guildMusicManager.getTrackScheduler().setQueue(queue);
-        event.replyEmbeds(embed.setDescription("The queue has been shuffled").build()).queue();
+                    return event.reply().withEmbeds(embed.description("Not in the same voice channel!").build());
+                });
     }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "skip",
+  "description": "Skip/remove first song from queue",
+  "options": [
+    {
+      "name": "position",
+      "description": "Remove song from desired position",
+      "type": 4,
+      "required": false
+    }
+  ]
+}

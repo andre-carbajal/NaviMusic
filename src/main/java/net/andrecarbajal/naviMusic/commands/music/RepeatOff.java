@@ -11,10 +11,10 @@ import net.andrecarbajal.naviMusic.commands.ICommand;
 import net.andrecarbajal.naviMusic.util.EmbedCreator;
 import reactor.core.publisher.Mono;
 
-public class Repeat implements ICommand {
+public class RepeatOff implements ICommand {
     @Override
     public String getName() {
-        return "repeat";
+        return "repeat-off";
     }
 
     @Override
@@ -24,13 +24,13 @@ public class Repeat implements ICommand {
 
     @Override
     public String getDescription() {
-        return "Repeats current song";
+        return "Stop repeating current song";
     }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
         Member member = event.getInteraction().getMember().get();
-        EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Repeat Command");
+        EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Repeat Off Command");
 
         return member.getVoiceState()
                 .flatMap(VoiceState::getChannel)
@@ -40,15 +40,14 @@ public class Repeat implements ICommand {
                     if (isConnected) {
                         Snowflake guildId = event.getInteraction().getGuildId().orElse(Snowflake.of(0));
                         TrackScheduler scheduler = GuildAudioManager.of(guildId).getScheduler();
-                        if (scheduler.isRepeating())
-                            return event.reply().withEmbeds(embed.description("Already repeating current song!").build());
+                        if (!scheduler.isRepeating())
+                            return event.reply().withEmbeds(embed.description("Not repeating current song!").build());
 
-                        scheduler.setRepeating(true);
-                        return event.reply().withEmbeds(embed.description("The song will be repeated!").build());
+                        scheduler.setRepeating(false);
+                        return event.reply().withEmbeds(embed.description("The song will not be repeated!").build());
                     }
 
-                    return event.reply().withEmbeds(
-                            embed.description(String.format("Not in the same voice channel as %s!", member.getNicknameMention())).build());
+                    return event.reply().withEmbeds(embed.description("Not in the same voice channel!").build());
                 });
     }
 }

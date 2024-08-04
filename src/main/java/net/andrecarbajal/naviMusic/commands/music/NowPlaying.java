@@ -1,17 +1,16 @@
 package net.andrecarbajal.naviMusic.commands.music;
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import net.andrecarbajal.naviMusic.commands.CommandUtils;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
+import net.andrecarbajal.naviMusic.audio.GuildAudioManager;
 import net.andrecarbajal.naviMusic.commands.ICommand;
-import net.andrecarbajal.naviMusic.lavaplayer.GuildMusicManager;
-import net.andrecarbajal.naviMusic.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
+import net.andrecarbajal.naviMusic.util.EmbedCreator;
+import reactor.core.publisher.Mono;
 
 public class NowPlaying implements ICommand {
     @Override
@@ -20,41 +19,39 @@ public class NowPlaying implements ICommand {
     }
 
     @Override
+    public String getCategory() {
+        return "Music";
+    }
+
+    @Override
     public String getDescription() {
         return "Will display the current playing song";
     }
 
     @Override
-    public List<OptionData> getOptions() {
-        return null;
-    }
+    public Mono<Void> handle(ChatInputInteractionEvent event) {
+        Member member = event.getInteraction().getMember().get();
 
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        Member member = event.getMember();
-        Member self = event.getGuild().getSelfMember();
+        EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Now Playing");
 
-        if (!CommandUtils.validateVoiceState(event, member, self)) return;
+        return member.getVoiceState()
+                .flatMap(VoiceState::getChannel)
+                .flatMap(voiceChannel -> voiceChannel.isMemberConnected(event.getClient().getSelfId()))
+                .defaultIfEmpty(false)
+                .flatMap(isConnected -> {
+                    if (isConnected) {
+                        Snowflake guildId = event.getInteraction().getGuildId().orElse(Snowflake.of(0));
+                        AudioPlayer player = GuildAudioManager.of(guildId).getPlayer();
+                        AudioTrack track = player.getPlayingTrack();
 
-        GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
-        if(guildMusicManager.getTrackScheduler().getPlayer().getPlayingTrack() == null) {
-            event.reply("I am not playing anything").queue();
-            return;
-        }
-        EmbedBuilder embedBuilder = getBuilder(guildMusicManager);
-        event.replyEmbeds(embedBuilder.build()).queue();
-    }
+                        if (track == null) {
+                            return event.reply().withEmbeds(embed.description("No songs currently playing!").build());
+                        }
 
-    @NotNull
-    private static EmbedBuilder getBuilder(GuildMusicManager guildMusicManager) {
-        AudioTrackInfo info = guildMusicManager.getTrackScheduler().getPlayer().getPlayingTrack().getInfo();
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Currently Playing");
-        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
-        embedBuilder.setDescription("**Name:** `" + info.title + "`");
-        embedBuilder.appendDescription("\n**Author:** `" + info.author + "`");
-        embedBuilder.appendDescription("\n**URL:** `" + info.uri + "`");
-        embedBuilder.appendDescription("\n**Duration:** `" + info.length / 60000 + ":" + String.format("%02d", info.length % 60000 / 1000) + "`");
-        return embedBuilder;
+                        return event.reply().withEmbeds(EmbedCreator.createEmbedSongs(embed, track.getInfo()).build());
+                    }
+
+                    return event.reply().withEmbeds(embed.description(String.format("Not in the same voice channel as %s!", member.getNicknameMention())).build());
+                });
     }
 }

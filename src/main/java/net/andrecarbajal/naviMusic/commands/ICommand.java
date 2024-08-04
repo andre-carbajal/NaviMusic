@@ -1,13 +1,22 @@
 package net.andrecarbajal.naviMusic.commands;
 
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-
-import java.util.List;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import reactor.core.publisher.Mono;
 
 public interface ICommand {
-    String getName();
-    String getDescription();
-    List<OptionData> getOptions();
-    void execute(SlashCommandInteractionEvent event);
+    default String getName() {
+        return "COMMAND_NAME";
+    }
+
+    default String getCategory() {
+        return "COMMAND_CATEGORY";
+    }
+
+    default String getDescription() {
+        return "COMMAND_DESCRIPTION";
+    }
+
+    default Mono<Void> handle(ChatInputInteractionEvent event) {
+        return null;
+    }
 }

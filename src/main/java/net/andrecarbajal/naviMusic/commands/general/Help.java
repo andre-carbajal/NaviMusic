@@ -1,23 +1,23 @@
 package net.andrecarbajal.naviMusic.commands.general;
 
-import net.andrecarbajal.naviMusic.commands.CommandManager;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import net.andrecarbajal.naviMusic.commands.ICommand;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-
-import java.util.List;
+import net.andrecarbajal.naviMusic.manager.CommandManager;
+import net.andrecarbajal.naviMusic.util.EmbedCreator;
+import reactor.core.publisher.Mono;
 
 public class Help implements ICommand {
-    private final CommandManager commandManager;
-
-    public Help(CommandManager commandManager) {
-        this.commandManager = commandManager;
-    }
+    private final CommandManager commandManager = new CommandManager();
 
     @Override
     public String getName() {
         return "help";
+    }
+
+    @Override
+    public String getCategory() {
+        return "General";
     }
 
     @Override
@@ -26,27 +26,12 @@ public class Help implements ICommand {
     }
 
     @Override
-    public List<OptionData> getOptions() {
-        return null;
-    }
-
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("List of Commands");
-        embedBuilder.setThumbnail("https://i.imgur.com/xiiGqIO.png");
+    public Mono<Void> handle(ChatInputInteractionEvent event) {
+        EmbedCreateSpec.Builder embedBuilder = EmbedCreator.createEmbed("List of commands");
 
         for (ICommand command : commandManager.getCommands()) {
-            StringBuilder commandInfo = new StringBuilder("/" + command.getName());
-            List<OptionData> options = command.getOptions();
-            if (options != null) {
-                for (OptionData option : options) {
-                    commandInfo.append(" <").append(option.getName()).append(">");
-                }
-            }
-            embedBuilder.addField(commandInfo.toString(), command.getDescription(), false);
+            embedBuilder.addField("/" + command.getName(), command.getDescription(), false);
         }
-
-        event.replyEmbeds(embedBuilder.build()).queue();
+        return event.reply().withEmbeds(embedBuilder.build()).then();
     }
 }

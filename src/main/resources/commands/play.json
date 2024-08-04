@@ -1,0 +1,32 @@
+{
+  "name": "play",
+  "description": "Play track or playlist",
+  "options": [
+    {
+      "name": "name-url-playlist",
+      "description": "Link or search query",
+      "type": 3,
+      "required": true
+    },
+    {
+      "name": "provider",
+      "description": "Provider to search for song",
+      "type": 3,
+      "required": false,
+      "choices": [
+        {
+          "name": "YouTube",
+          "value": "ytsearch"
+        },
+        {
+          "name": "YouTube Music",
+          "value": "ytmsearch"
+        },
+        {
+          "name": "SoundCloud",
+          "value": "scsearch"
+        }
+      ]
+    }
+  ]
+}

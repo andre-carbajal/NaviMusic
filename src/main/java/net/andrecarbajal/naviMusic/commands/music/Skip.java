@@ -1,15 +1,16 @@
 package net.andrecarbajal.naviMusic.commands.music;
 
-import net.andrecarbajal.naviMusic.commands.CommandUtils;
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
+import net.andrecarbajal.naviMusic.audio.GuildAudioManager;
 import net.andrecarbajal.naviMusic.commands.ICommand;
-import net.andrecarbajal.naviMusic.lavaplayer.GuildMusicManager;
-import net.andrecarbajal.naviMusic.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-
-import java.util.List;
+import net.andrecarbajal.naviMusic.util.EmbedCreator;
+import reactor.core.publisher.Mono;
 
 public class Skip implements ICommand {
     @Override
@@ -18,29 +19,45 @@ public class Skip implements ICommand {
     }
 
     @Override
+    public String getCategory() {
+        return "Music";
+    }
+
+    @Override
     public String getDescription() {
-        return "Will skip the current song";
+        return "Skip/remove first song from queue";
     }
 
     @Override
-    public List<OptionData> getOptions() {
-        return null;
-    }
+    public Mono<Void> handle(ChatInputInteractionEvent event) {
+        Member member = event.getInteraction().getMember().get();
+        EmbedCreateSpec.Builder embed = EmbedCreator.createEmbed("Skip Command");
 
-    @Override
-    public void execute(SlashCommandInteractionEvent event) {
-        Member member = event.getMember();
-        Member self = event.getGuild().getSelfMember();
+        return member.getVoiceState()
+                .flatMap(VoiceState::getChannel)
+                .flatMap(voiceChannel -> voiceChannel.isMemberConnected(event.getClient().getSelfId()))
+                .defaultIfEmpty(false)
+                .flatMap(isConnected -> {
+                    if (isConnected) {
+                        Snowflake guildId = event.getInteraction().getGuildId().orElse(Snowflake.of(0));
+                        int position = Math.toIntExact(event.getOption("position")
+                                .flatMap(ApplicationCommandInteractionOption::getValue)
+                                .map(ApplicationCommandInteractionOptionValue::asLong).orElse(0L));
 
-        if (!CommandUtils.validateVoiceState(event, member, self)) return;
+                        if (position == 0) {
+                            if (GuildAudioManager.of(guildId).getPlayer().getPlayingTrack() == null)
+                                return event.reply().withEmbeds(embed.description("No song is currently playing!").build());
+                            if (GuildAudioManager.of(guildId).getScheduler().skip())
+                                return event.reply().withEmbeds(embed.description("Skipping to next song!").build());
+                            GuildAudioManager.of((guildId)).getPlayer().stopTrack();
+                            return event.reply().withEmbeds(embed.description("Skipping current song!").build());
+                        }
 
-        GuildMusicManager guildMusicManager = PlayerManager.get().getGuildMusicManager(event.getGuild());
-        guildMusicManager.getTrackScheduler().getPlayer().stopTrack();
+                        GuildAudioManager.of(guildId).getScheduler().skip(position - 1);
+                        return event.reply().withEmbeds(embed.description(String.format("Skipping song at position `%d` in queue!", position)).build());
+                    }
 
-        EmbedBuilder embed = new EmbedBuilder();
-        embed.setTitle("Skip Command");
-        embed.setThumbnail("https://i.imgur.com/xiiGqIO.png");
-
-        event.replyEmbeds(embed.setDescription("The song was skipped").build()).queue();
+                    return event.reply().withEmbeds(embed.description("Not in the same voice channel!").build());
+                });
     }
 }
