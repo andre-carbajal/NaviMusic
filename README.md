@@ -21,7 +21,7 @@ development and testing purposes.
 
 Before you begin, ensure you have the following installed on your machine:
 
-- Java 17
+- Java 21
 - Maven
 - Docker (optional)
 
