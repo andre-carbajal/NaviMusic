@@ -1,17 +1,21 @@
-FROM maven:3.9.6-eclipse-temurin-17
+FROM maven:3.9.8-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-COPY pom.xml ./
-
+COPY pom.xml .
 RUN mvn dependency:resolve
 
 COPY src ./src
-
 RUN mvn compile
 
-COPY target/*.jar ./NaviMusic.jar
+FROM eclipse-temurin:21-jre
 
-ENV DISCORD_TOKEN = ""
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar /app/NaviMusic.jar
+
+ENV DISCORD_TOKEN=""
+ENV SPOTIFY_CLIENT_ID=""
+ENV SPOTIFY_SECRET=""
 
 ENTRYPOINT ["java", "-Xmx512m", "-jar", "/app/NaviMusic.jar", "nogui"]

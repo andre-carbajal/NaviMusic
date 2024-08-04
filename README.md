@@ -1,8 +1,10 @@
 # NaviMusic: Your Personal Music Bot for Discord
 
-Welcome to NaviMusic, a highly user-friendly music bot for Discord. Developed using the robust Java Discord API (JDA), NaviMusic offers a seamless music experience for your Discord server.
+Welcome to NaviMusic, a highly user-friendly music bot for Discord. Developed using Discord4J, NaviMusic offers a
+seamless music experience for your Discord server.
 
 ## Table of Contents
+
 - [Getting Started](#getting-started)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
@@ -12,7 +14,8 @@ Welcome to NaviMusic, a highly user-friendly music bot for Discord. Developed us
 
 ## Getting Started
 
-This section provides a step-by-step guide on how to get a copy of NaviMusic up and running on your local machine for development and testing purposes.
+This section provides a step-by-step guide on how to get a copy of NaviMusic up and running on your local machine for
+development and testing purposes.
 
 ## Prerequisites
 
@@ -41,31 +44,20 @@ Follow these steps to get a copy of NaviMusic on your local machine:
 
 ## Running the Application
 
-You can run NaviMusic using the following commands:
 Replace x.y with the version number of the last release.
+{nogui} is an optional argument to run the bot without the GUI.
+You can run NaviMusic using the following commands:
 
-### With DISCORD_TOKEN in your system variables:
+### Without environment variables
 
-With GUI:
 ```bash
-java -jar target/NaviMusic-x.y.jar
+java -jar target/NaviMusic-x.y.jar {nogui}
 ```
 
-Without GUI:
-```bash
-java -jar target/NaviMusic-x.y.jar nogui
-```
+### With environment variables
 
-### With DISCORD_TOKEN as a command line argument:
-
-With GUI:
 ```bash
-java -jar target/NaviMusic-x.y <your_discord_token>
-```
-
-Without GUI:
-```bash
-java -jar target/NaviMusic-x.y <your_discord_token> nogui
+java -jar target/NaviMusic-x.y.jar DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret {nogui}
 ```
 
 ## Docker Usage
@@ -76,7 +68,7 @@ You have two options to run NaviMusic using Docker:
 
     ```bash
     docker pull anvian/navi-music
-    docker run -e DISCORD_TOKEN=your_discord_token anvian/navi-music
+    docker run -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret anvian/navi-music
     ```
 
 2. **Or, build and run the Docker image locally:**
@@ -90,9 +82,10 @@ You have two options to run NaviMusic using Docker:
    Then, run the Docker container, passing your Discord token as an argument:
 
     ```bash
-    docker run -e DISCORD_TOKEN=your_discord_token navimusic
+    docker run -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret navimusic
     ```
 
 ## License
+
 This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
 For more details, see the [LICENSE](LICENSE) file.

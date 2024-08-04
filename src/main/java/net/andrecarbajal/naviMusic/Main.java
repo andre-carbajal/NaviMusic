@@ -33,16 +33,30 @@ public class Main {
     public static void main(String[] args) {
         guiManager.checkGui(getGuiOption(args));
 
-        if (System.getenv("DISCORD_TOKEN") == null) {
+        String discordToken = System.getenv("DISCORD_TOKEN");
+        String spotifyClientId = System.getenv("SPOTIFY_CLIENT_ID");
+        String spotifySecret = System.getenv("SPOTIFY_SECRET");
+
+        for (String arg : args) {
+            if (arg.startsWith("DISCORD_TOKEN=")) {
+                discordToken = arg.substring("DISCORD_TOKEN=".length());
+            } else if (arg.startsWith("SPOTIFY_CLIENT_ID=")) {
+                spotifyClientId = arg.substring("SPOTIFY_CLIENT_ID=".length());
+            } else if (arg.startsWith("SPOTIFY_SECRET=")) {
+                spotifySecret = arg.substring("SPOTIFY_SECRET=".length());
+            }
+        }
+
+        if (discordToken == null) {
             LOGGER.error("Discord Token is missing!");
             return;
         }
-        if (System.getenv("SPOTIFY_CLIENT_ID") == null || System.getenv("SPOTIFY_SECRET") == null) {
+        if (spotifyClientId == null || spotifySecret == null) {
             LOGGER.error("Spotify credentials are missing!");
             return;
         }
 
-        final GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("DISCORD_TOKEN")).build()
+        final GatewayDiscordClient client = DiscordClientBuilder.create(discordToken).build()
                 .gateway()
                 .login().block();
 
@@ -62,10 +76,11 @@ public class Main {
     }
 
     private static String getGuiOption(String[] args) {
-        if (System.getenv("DISCORD_TOKEN") != null && !System.getenv("DISCORD_TOKEN").isEmpty()) {
-            return args.length > 0 ? args[0] : "";
-        } else {
-            return args.length > 1 ? args[1] : "";
+        for (String arg : args) {
+            if (arg.equals("nogui")) {
+                return "nogui";
+            }
         }
+        return "";
     }
 }

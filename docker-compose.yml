@@ -1,0 +1,13 @@
+services:
+  navi_music:
+    container_name: navi_music
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - /var/log/navi_music:/logs
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN:-ADD_DISCORD_TOKEN}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID:-ADD_SPOTIFY_CLIENT_ID}
+      - SPOTIFY_SECRET=${SPOTIFY_SECRET:-ADD_SPOTIFY_SECRET}
