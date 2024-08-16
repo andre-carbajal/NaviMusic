@@ -68,7 +68,7 @@ You have two options to run NaviMusic using Docker:
 
     ```bash
     docker pull anvian/navi-music
-    docker run -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret anvian/navi-music
+    docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret
     ```
 
 2. **Or, build and run the Docker image locally:**
@@ -82,7 +82,7 @@ You have two options to run NaviMusic using Docker:
    Then, run the Docker container, passing your Discord token as an argument:
 
     ```bash
-    docker run -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret navimusic
+    docker run navimusic -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret
     ```
 
 ## License
