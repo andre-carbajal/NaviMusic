@@ -1,4 +1,3 @@
 # Release Notes
 
-- Auth2 is now available for all users
-- Dependencies have been updated
+- Fixing YOUTUBE_OAUTH2_CODE as command line argument

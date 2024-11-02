@@ -19,22 +19,7 @@ public class Main {
     public static final Logger LOGGER = LoggerFactory.getLogger("NaviMusic");
     private static final GUIManager guiManager = new GUIManager();
 
-    public static final AudioPlayerManager PLAYER_MANAGER;
-
-    static {
-        YoutubeAudioSourceManager ytSourceManager = new YoutubeAudioSourceManager();
-        String oauth2Code = System.getenv("YOUTUBE_OAUTH2_CODE");
-        if (oauth2Code != null) {
-            ytSourceManager.useOauth2(oauth2Code, true);
-        } else {
-            ytSourceManager.useOauth2(null, false);
-        }
-
-        PLAYER_MANAGER = new DefaultAudioPlayerManager();
-        PLAYER_MANAGER.registerSourceManager(ytSourceManager);
-        AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
-        AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
-    }
+    public static AudioPlayerManager PLAYER_MANAGER;
 
     public static void main(String[] args) {
         guiManager.checkGui(getGuiOption(args));
@@ -42,6 +27,7 @@ public class Main {
         String discordToken = System.getenv("DISCORD_TOKEN");
         String spotifyClientId = System.getenv("SPOTIFY_CLIENT_ID");
         String spotifySecret = System.getenv("SPOTIFY_SECRET");
+        String youtubeOauth2Code = System.getenv("YOUTUBE_OAUTH2_CODE");
 
         for (String arg : args) {
             if (arg.startsWith("DISCORD_TOKEN=")) {
@@ -50,6 +36,8 @@ public class Main {
                 spotifyClientId = arg.substring("SPOTIFY_CLIENT_ID=".length());
             } else if (arg.startsWith("SPOTIFY_SECRET=")) {
                 spotifySecret = arg.substring("SPOTIFY_SECRET=".length());
+            } else if (arg.startsWith("YOUTUBE_OAUTH2_CODE=")) {
+                youtubeOauth2Code = arg.substring("YOUTUBE_OAUTH2_CODE=".length());
             }
         }
 
@@ -61,6 +49,8 @@ public class Main {
             LOGGER.error("Spotify credentials are missing!");
             return;
         }
+
+        initializePlayerManager(youtubeOauth2Code);
 
         final GatewayDiscordClient client = DiscordClientBuilder.create(discordToken).build()
                 .gateway()
@@ -79,6 +69,20 @@ public class Main {
                                 .doOnError(t -> LOGGER.error("Error with ChatInputInteractionEvent: {}", t.toString())),
                         client.onDisconnect().doOnTerminate(() -> LOGGER.info("Disconnected!")))
                 .block();
+    }
+
+    private static void initializePlayerManager(String youtubeOauth2Code) {
+        YoutubeAudioSourceManager ytSourceManager = new YoutubeAudioSourceManager();
+        if (youtubeOauth2Code != null) {
+            ytSourceManager.useOauth2(youtubeOauth2Code, true);
+        } else {
+            ytSourceManager.useOauth2(null, false);
+        }
+
+        PLAYER_MANAGER = new DefaultAudioPlayerManager();
+        PLAYER_MANAGER.registerSourceManager(ytSourceManager);
+        AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
+        AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
     }
 
     private static String getGuiOption(String[] args) {
