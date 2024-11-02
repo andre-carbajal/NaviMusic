@@ -22,10 +22,16 @@ public class Main {
     public static final AudioPlayerManager PLAYER_MANAGER;
 
     static {
-        PLAYER_MANAGER = new DefaultAudioPlayerManager();
         YoutubeAudioSourceManager ytSourceManager = new YoutubeAudioSourceManager();
-        PLAYER_MANAGER.registerSourceManager(ytSourceManager);
+        String oauth2Code = System.getenv("YOUTUBE_OAUTH2_CODE");
+        if (oauth2Code != null) {
+            ytSourceManager.useOauth2(oauth2Code, true);
+        } else {
+            ytSourceManager.useOauth2(null, false);
+        }
 
+        PLAYER_MANAGER = new DefaultAudioPlayerManager();
+        PLAYER_MANAGER.registerSourceManager(ytSourceManager);
         AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
         AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
     }

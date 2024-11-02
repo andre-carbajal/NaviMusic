@@ -7,9 +7,8 @@ seamless music experience for your Discord server.
 
 - [Getting Started](#getting-started)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
 - [Running the Application](#running-the-application)
-- [Docker Usage](#docker-usage)
+- [Running the Application with Docker](#running-the-application-with-docker)
 - [License](#license)
 
 ## Getting Started
@@ -25,65 +24,71 @@ Before you begin, ensure you have the following installed on your machine:
 - Maven
 - Docker (optional)
 
-## Installation
-
-Follow these steps to get a copy of NaviMusic on your local machine:
-
-1. **Clone the repository**
-    ```bash
-    git clone https://github.com/andre-carbajal/NaviMusic.git
-    ```
-2. **Navigate into the cloned repository**
-    ```bash
-    cd NaviMusic
-    ```
-3. **Build the project with Maven**
-    ```bash
-    mvn clean compile
-    ```
-
 ## Running the Application
 
 Replace x.y with the version number of the last release.
 {nogui} is an optional argument to run the bot without the GUI.
-You can run NaviMusic using the following commands:
 
-### Without environment variables
-
-```bash
-java -jar target/NaviMusic-x.y.jar {nogui}
-```
+First execute the bot with all the environment variables(DISCORD_TOKEN, SPOTIFY_CLIENT_ID, SPOTIFY_SECRET)
+Later follow the steps to get the YOUTUBE_OAUTH2_CODE
+Finally you need to configure your YOUTUBE_OAUTH2_CODE on the environment variables
 
 ### With environment variables
 
+- Set the following environment variables:
+    - DISCORD_TOKEN: Your Discord bot token
+    - SPOTIFY_CLIENT_ID: Your Spotify client ID
+    - SPOTIFY_SECRET: Your Spotify secret
+- Run the bot
+
 ```bash
-java -jar target/NaviMusic-x.y.jar DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret {nogui}
+java -jar NaviMusic-x.y.jar {nogui}
 ```
 
-## Docker Usage
+- Complete the steps to get the YOUTUBE_OAUTH2_CODE
+- Set the following environment variables:
+    - YOUTUBE_OAUTH2_CODE: Your Youtube OAuth2 code
+- Run the bot again
 
-You have two options to run NaviMusic using Docker:
+```bash
+java -jar NaviMusic-x.y.jar {nogui}
+```
 
-1. **Pull the Docker image from Docker Hub:**
+### With command line arguments
 
-    ```bash
-    docker pull anvian/navi-music
-    docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret
-    ```
+- Run the bot
 
-2. **Or, build and run the Docker image locally:**
+```bash
+java -jar NaviMusic-x.y.jar DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret {nogui}
+```
 
-   First, build the Docker image:
+- Complete the steps to get the YOUTUBE_OAUTH2_CODE
+- Run the bot again
 
-    ```bash
-    docker build -t navimusic .
-    ```
+```bash
+java -jar NaviMusic-x.y.jar DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret YOUTUBE_OAUTH2_CODE=your_youtube_oauth2_code {nogui}
+```
 
-   Then, run the Docker container, passing your Discord token as an argument:
+## Running the Application with Docker
 
-    ```bash
-    docker run navimusic -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret
-    ```
+- Pull the Docker image from Docker Hub:
+
+```bash
+docker pull anvian/navi-music
+```
+
+- Run the Docker container, passing your Discord, Spotify Client ID, and Spotify Secret tokens as arguments:
+
+```bash
+docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret
+```
+
+- Complete the steps to get the YOUTUBE_OAUTH2_CODE
+- Run the Docker container again, passing your Youtube OAuth2 code as an argument:
+
+```bash
+docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_SECRET=your_spotify_secret YOUTUBE_OAUTH2_CODE=your_youtube_oauth2_code
+```
 
 ## License
 

@@ -6,7 +6,7 @@
 
     <groupId>net.andrecarbajal</groupId>
     <artifactId>NaviMusic</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -62,13 +62,13 @@
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>v2</artifactId>
-            <version>1.6.0</version>
+            <version>1.8.3</version>
         </dependency>
         <!--Spotify-->
         <dependency>
             <groupId>se.michaelthelin.spotify</groupId>
             <artifactId>spotify-web-api-java</artifactId>
-            <version>8.4.0</version>
+            <version>8.4.1</version>
         </dependency>
         <!--SpringFramework-->
         <dependency>
