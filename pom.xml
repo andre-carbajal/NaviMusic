@@ -6,7 +6,7 @@
 
     <groupId>net.andrecarbajal</groupId>
     <artifactId>NaviMusic</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
