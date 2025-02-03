@@ -5,13 +5,18 @@ import net.andrecarbajal.naviMusic.gui.ConsoleGUI;
 import java.awt.*;
 
 public class GUIManager {
-    public void checkGui(Boolean guiAvailable){
-        if (!guiAvailable) {
-            System.setProperty("java.awt.headless", "true");
+    public void checkGui(String[] args) {
+        boolean isGuiVisible = true;
+
+        for (String arg : args) {
+            if (arg.equals("nogui")) {
+                System.setProperty("java.awt.headless", "true");
+                isGuiVisible = false;
+                break;
+            }
         }
 
         if (!GraphicsEnvironment.isHeadless()) {
-            boolean isGuiVisible = guiAvailable;
             ConsoleGUI consoleGUI = new ConsoleGUI();
             consoleGUI.setVisible(isGuiVisible);
         }

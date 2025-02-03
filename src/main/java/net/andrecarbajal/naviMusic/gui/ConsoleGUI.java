@@ -35,7 +35,7 @@ public class ConsoleGUI {
 
                 @Override
                 public void write(byte @NotNull [] b, int off, int len) {
-                    updateTextArea(new String(b, off, len, StandardCharsets.UTF_16));
+                    updateTextArea(new String(b, off, len, StandardCharsets.UTF_8));
                 }
 
                 @Override
@@ -43,8 +43,8 @@ public class ConsoleGUI {
                     write(b, 0, b.length);
                 }
             };
-            System.setOut(new PrintStream(out, true, StandardCharsets.UTF_16));
-            System.setErr(new PrintStream(out, true, StandardCharsets.UTF_16));
+            System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+            System.setErr(new PrintStream(out, true, StandardCharsets.UTF_8));
         }
     }
 
