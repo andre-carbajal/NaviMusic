@@ -68,7 +68,7 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         AudioTrack firstTrack = playlist.getSelectedTrack();
 
         if (firstTrack == null) {
-            firstTrack = playlist.getTracks().get(0);
+            firstTrack = playlist.getTracks().getFirst();
         }
 
         if (playlist.isSearchResult()) {
