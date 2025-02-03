@@ -10,7 +10,7 @@ public class SkipCommand extends SlashCommand {
     private final MusicService musicService;
 
     public SkipCommand(MusicService musicService) {
-        super("skip", "Skip la cancion actual");
+        super("skip", "Skip/remove first song from queue");
 
         this.musicService=musicService;
     }

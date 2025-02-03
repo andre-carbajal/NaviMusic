@@ -18,11 +18,11 @@ public class TrackScheduler extends AudioEventAdapter {
     private final BlockingQueue<AudioTrack> queue=new LinkedBlockingQueue<>();
 
     public void queue(AudioTrack track) {
-        log.info("Añadiendo {} a la cola", track.getInfo().title);
+        log.info("Adding {} in the queue", track.getInfo().title);
         if (player.startTrack(track, true)) {
             logTackStarted(track);
         } else {
-            if (!queue.offer(track)) throw new RuntimeException("El elemento no se agrego a la cola");
+            if (!queue.offer(track)) throw new RuntimeException("Item was not added to the queue");
         }
     }
 
@@ -51,7 +51,7 @@ public class TrackScheduler extends AudioEventAdapter {
         }
 
         if (endReason==AudioTrackEndReason.LOAD_FAILED) {
-            log.error(String.format("Error reproduciendo %s (%s)", track.getInfo().title, track.getInfo().uri));
+            log.error(String.format("Error playing %s (%s)", track.getInfo().title, track.getInfo().uri));
             nextTrack();
         }
     }
@@ -60,9 +60,9 @@ public class TrackScheduler extends AudioEventAdapter {
         Member member = track.getUserData(Member.class);
 
         if (member != null) {
-            log.info("Reproduciendo {} en {} pedida por {}", track.getInfo().title, member.getGuild().getName(), member.getEffectiveName());
+            log.info("Playing {} in {} requested by {}", track.getInfo().title, member.getGuild().getName(), member.getEffectiveName());
         } else {
-            log.info("Reproduciendo {}", track.getInfo().title);
+            log.info("Playing {}", track.getInfo().title);
         }
     }
 }

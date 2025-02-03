@@ -16,8 +16,8 @@ public class PlayCommand extends SlashCommand {
     private final MusicService musicService;
 
     public PlayCommand(MusicService musicService) {
-        super("play", "Agrega un video (o playlist) a la cola");
-        addOption(new OptionData(OptionType.STRING, "canción", "URL o nombre de la canción", true));
+        super("play", "Play track or playlist");
+        addOption(new OptionData(OptionType.STRING, "name-url-playlist", "Link or search query", true));
 
         this.musicService = musicService;
     }
@@ -27,7 +27,7 @@ public class PlayCommand extends SlashCommand {
         if (noVoiceChannelCheck(event)) return;
         event.deferReply().queue();
         try {
-            String cancion = event.getOption("canción", OptionMapping::getAsString);
+            String cancion = event.getOption("name-url-playlist", OptionMapping::getAsString);
             try {
                 new URI(cancion);
             } catch (URISyntaxException e) {

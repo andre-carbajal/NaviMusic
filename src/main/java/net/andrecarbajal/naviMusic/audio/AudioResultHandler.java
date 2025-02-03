@@ -28,7 +28,6 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         this.member = member;
     }
 
-
     @Getter
     private Response response;
 
@@ -43,18 +42,18 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         RichResponse r = new RichResponse();
 
         r.setColor(new Color(0, 51, 102));
-        r.setTitle("Canción añadida a la cola");
+        r.setTitle("Song added to queue");
         r.setText(String.format("[%s](%s) de `%s`", track.getInfo().title.trim(), uri, track.getInfo().author));
 
         List<MessageEmbed.Field> fields = new ArrayList<>();
-        fields.add(new MessageEmbed.Field("Duración", new VideoInfo(track.getInfo()).durationToReadable(), true));
+        fields.add(new MessageEmbed.Field("Duration", new VideoInfo(track.getInfo()).durationToReadable(), true));
 
         int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize()+1;
-        fields.add(new MessageEmbed.Field("En cola", String.format(size==1?"%d canción":"%d canciones", size), true));
+        fields.add(new MessageEmbed.Field("In queue", String.format(size==1?"%d song":"%d songs", size), true));
 
         r.setFields(fields);
 
-        r.setFooter(new RichResponse.Footer(String.format("Agregada por %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
+        r.setFooter(new RichResponse.Footer(String.format("Added by %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
 
         if (track.getSourceManager() instanceof YoutubeAudioSourceManager) {
             URLUtils.getURLParam(uri, "v").ifPresent(s -> r.setThumbnail(String.format("https://img.youtube.com/vi/%s/maxresdefault.jpg", s)));
@@ -80,20 +79,20 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         RichResponse r = new RichResponse();
 
         r.setColor(new Color(0, 51, 102));
-        r.setTitle("Playlist añadida a la cola");
+        r.setTitle("Playlist added to queue");
 
         r.setText(String.format("%s", playlist.getName()));
 
         int playlistSize = playlist.getTracks().size();
         List<MessageEmbed.Field> fields = new ArrayList<>();
-        fields.add(new MessageEmbed.Field("Canciones añadidas", String.valueOf(playlistSize), true));
+        fields.add(new MessageEmbed.Field("Songs added", String.valueOf(playlistSize), true));
 
         int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize()+playlistSize;
-        fields.add(new MessageEmbed.Field("En cola", String.format(size==1?"%d canción":"%d canciones", size), true));
+        fields.add(new MessageEmbed.Field("In queue", String.format(size==1?"%d song":"%d songs", size), true));
 
         r.setFields(fields);
 
-        r.setFooter(new RichResponse.Footer(String.format("Agregada por %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
+        r.setFooter(new RichResponse.Footer(String.format("Added by %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
 
         if (firstTrack.getSourceManager() instanceof YoutubeAudioSourceManager) {
             URLUtils.getURLParam(firstTrack.getInfo().uri, "v").ifPresent(s -> r.setThumbnail(String.format("https://img.youtube.com/vi/%s/maxresdefault.jpg", s)));
@@ -108,17 +107,17 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         RichResponse r = new RichResponse();
 
         r.setType(Response.Type.USER_ERROR);
-        r.setText("No se encontró nada");
+        r.setText("Nothing found");
         response=r;
     }
 
     @Override
     public void loadFailed(FriendlyException exception) {
-        log.error("Error cargando el track", exception);
+        log.error("Error loading track", exception);
 
         RichResponse r = new RichResponse();
         r.setType(Response.Type.ERROR);
-        r.setText("Error interno");
+        r.setText("Internal error");
         response=r;
     }
 }

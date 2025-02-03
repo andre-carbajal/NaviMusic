@@ -49,14 +49,14 @@ public class MusicService {
         GuildMusicManager musicManager = getGuildMusicManager(channel.getGuild());
         musicManager.getScheduler().nextTrack();
 
-        return new Response("Skipeado", Response.Type.OK, false);
+        return new Response("Skipped", Response.Type.OK, false);
     }
 
     public Response clear(Guild guild) {
         GuildMusicManager musicManager = getGuildMusicManager(guild);
         musicManager.getScheduler().clear();
 
-        return new Response("Limpiado", Response.Type.OK, false);
+        return new Response("Cleaning...", Response.Type.OK, false);
     }
 
     public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track, Member member) {
@@ -82,7 +82,7 @@ public class MusicService {
             audioManager.openAudioConnection(audioManager.getGuild().getVoiceChannels().stream().filter(voiceChannel -> voiceChannel.getMembers().contains(member)).findFirst().orElseThrow());
             return true;
         } catch (Exception ex) {
-            log.error("Error uniendose al canal: ",ex);
+            log.error("Error joining voice channel", ex);
             return false;
         }
 

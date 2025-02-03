@@ -10,7 +10,10 @@ public class VideoInfo {
     private final AudioTrackInfo info;
 
     public String durationToReadable() {
-        return String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(info.length),
-                TimeUnit.MILLISECONDS.toSeconds(info.length) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(info.length)));
+        long hours = TimeUnit.MILLISECONDS.toHours(info.length);
+        long minute = TimeUnit.MILLISECONDS.toMinutes(info.length) - TimeUnit.HOURS.toMinutes(hours);
+        long second = TimeUnit.MILLISECONDS.toSeconds(info.length) - TimeUnit.MINUTES.toSeconds(minute);
+
+        return String.format("%d:%02d:%02d", hours, minute, second);
     }
 }

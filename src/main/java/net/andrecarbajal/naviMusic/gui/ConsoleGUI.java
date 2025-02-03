@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class ConsoleGUI {
     private final JFrame frame;
@@ -33,17 +34,17 @@ public class ConsoleGUI {
                 }
 
                 @Override
-                public void write(@NotNull byte[] b, int off, int len) {
-                    updateTextArea(new String(b, off, len));
+                public void write(byte @NotNull [] b, int off, int len) {
+                    updateTextArea(new String(b, off, len, StandardCharsets.UTF_16));
                 }
 
                 @Override
-                public void write(@NotNull byte[] b) {
+                public void write(byte @NotNull [] b) {
                     write(b, 0, b.length);
                 }
             };
-            System.setOut(new PrintStream(out, true));
-            System.setErr(new PrintStream(out, true));
+            System.setOut(new PrintStream(out, true, StandardCharsets.UTF_16));
+            System.setErr(new PrintStream(out, true, StandardCharsets.UTF_16));
         }
     }
 

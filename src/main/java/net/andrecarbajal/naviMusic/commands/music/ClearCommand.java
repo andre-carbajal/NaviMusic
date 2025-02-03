@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class ClearCommand extends SlashCommand {
     private final MusicService musicService;
     public ClearCommand(MusicService musicService) {
-        super("clear", "Limpia la lista de reproducción");
+        super("clear", "Clear the queue");
 
         this.musicService=musicService;
     }

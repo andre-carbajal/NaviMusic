@@ -53,7 +53,7 @@ public class BotConfiguration extends ListenerAdapter {
 
             listeners.forEach(jda::addEventListener);
         } catch (InterruptedException e) {
-            log.error("Error al iniciar instancia JDA", e);
+            log.error("Error starting JDA instance", e);
             return null;
         }
 
