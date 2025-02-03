@@ -32,7 +32,7 @@ public abstract class SlashCommand {
             RichResponse response = new RichResponse();
             response.setEphimeral(true);
             response.setType(Response.Type.USER_ERROR);
-            response.setTitle("No estás en ningún canal de voz");
+            response.setTitle("You must be in a voice channel to use this command");
 
             response.sendReply(e);
             return true;

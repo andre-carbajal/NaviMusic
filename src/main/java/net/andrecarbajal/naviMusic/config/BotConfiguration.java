@@ -19,7 +19,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Configuration
 @Slf4j
@@ -84,7 +87,7 @@ public class BotConfiguration extends ListenerAdapter {
         }
     }
 
-
+    @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent e) {
         Optional<SlashCommand> commandOptional = slashCommands.parallelStream().filter(
                 slashCommand -> slashCommand.getName().equalsIgnoreCase(e.getName())
