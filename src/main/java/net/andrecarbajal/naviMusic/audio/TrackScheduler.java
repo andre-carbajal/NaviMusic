@@ -4,71 +4,65 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Member;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
+@Slf4j
+@RequiredArgsConstructor
 public class TrackScheduler extends AudioEventAdapter {
-    private final List<AudioTrack> queue;
     private final AudioPlayer player;
-    private boolean repeat = false;
+    private final BlockingQueue<AudioTrack> queue=new LinkedBlockingQueue<>();
 
-    public TrackScheduler(AudioPlayer player) {
-        queue = Collections.synchronizedList(new LinkedList<>());
-        this.player = player;
-    }
-
-    public List<AudioTrack> getQueue() {
-        return queue;
-    }
-
-    public boolean play(AudioTrack track) {
-        return play(track, false);
-    }
-
-    public boolean play(AudioTrack track, boolean force) {
-        boolean playing = player.startTrack(track, !force);
-        if (!playing)
-            queue.add(track);
-        return playing;
-    }
-
-    public boolean skip() {
-        return !queue.isEmpty() && play(queue.removeFirst(), true);
-    }
-
-    public boolean skip(int index){
-        if (!queue.isEmpty()){
-            queue.remove(index);
-            return true;
+    public void queue(AudioTrack track) {
+        log.info("Añadiendo {} a la cola", track.getInfo().title);
+        if (player.startTrack(track, true)) {
+            logTackStarted(track);
+        } else {
+            if (!queue.offer(track)) throw new RuntimeException("El elemento no se agrego a la cola");
         }
-        return false;
     }
+
+    public void nextTrack() {
+        AudioTrack track = queue.poll();
+        if (track != null) {
+            logTackStarted(track);
+        }
+        player.startTrack(track, false);
+    }
+
 
     public void clear() {
-        this.queue.clear();
+        queue.clear();
+        nextTrack();
     }
 
-    public void shuffle() {
-        Collections.shuffle(queue);
+    public int getQueueSize() {
+        return queue.size();
     }
 
-    public void setRepeating(boolean repeating){
-        this.repeat = repeating;
-    }
-
-    public boolean isRepeating(){
-        return this.repeat;
-    }
-
-    @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
-            if (repeat)
-                player.startTrack(track.makeClone(), false);
-            else
-                skip();
+            nextTrack();
+            return;
+        }
+
+        if (endReason==AudioTrackEndReason.LOAD_FAILED) {
+            log.error(String.format("Error reproduciendo %s (%s)", track.getInfo().title, track.getInfo().uri));
+            nextTrack();
+        }
+    }
+
+    private void logTackStarted(AudioTrack track) {
+        Member member = track.getUserData(Member.class);
+
+        if (member != null) {
+            log.info("Reproduciendo {} en {} pedida por {}", track.getInfo().title, member.getGuild().getName(), member.getEffectiveName());
+        } else {
+            log.info("Reproduciendo {}", track.getInfo().title);
         }
     }
 }
