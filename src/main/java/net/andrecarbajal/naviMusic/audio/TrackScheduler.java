@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -34,6 +36,19 @@ public class TrackScheduler extends AudioEventAdapter {
         player.startTrack(track, false);
     }
 
+    public void skipTrack(int position) {
+        if (position < 1) return;
+
+        if (position == 1) {
+            nextTrack();
+            return;
+        }
+
+        List<AudioTrack> tracks = new ArrayList<>(queue);
+        tracks.remove(position - 1);
+        queue.clear();
+        queue.addAll(tracks);
+    }
 
     public void clear() {
         queue.clear();

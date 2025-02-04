@@ -45,11 +45,18 @@ public class MusicService {
         return audioResult.getResponse();
     }
 
-    public Response skipTrack(TextChannel channel) {
+    public Response skipTrack(TextChannel channel, int position) {
         GuildMusicManager musicManager = getGuildMusicManager(channel.getGuild());
-        musicManager.getScheduler().nextTrack();
+        if (position < 1) return new Response("Invalid position", Response.Type.ERROR, false);
 
-        return new Response("Skipped", Response.Type.OK, false);
+        if (position == 1) {
+            musicManager.getScheduler().nextTrack();
+            return new Response("Skipped", Response.Type.OK, false);
+        }
+
+        musicManager.getScheduler().skipTrack(position - 1);
+
+        return new Response(String.format("Skipping song %d", position), Response.Type.OK, false);
     }
 
     public Response clear(Guild guild) {
