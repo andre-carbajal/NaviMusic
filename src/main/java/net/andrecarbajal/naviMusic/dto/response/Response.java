@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 @SuperBuilder
 @Data
 public class Response {
-
     private String text;
     private Type type=Type.OK;
 

@@ -6,11 +6,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.springframework.stereotype.Component;
 
 @Component
-public class ClearCommand extends SlashCommand {
+public class NowPlayingCommand extends SlashCommand {
     private final MusicService musicService;
 
-    public ClearCommand(MusicService musicService) {
-        super("clear", "Clear the queue");
+    public NowPlayingCommand(MusicService musicService) {
+        super("nowplaying", "Will display the current playing song");
         this.musicService = musicService;
     }
 
@@ -18,7 +18,6 @@ public class ClearCommand extends SlashCommand {
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;
 
-        musicService.clear(event.getGuild()).sendReply(event);
+        musicService.nowPlaying(event.getChannel().asTextChannel()).sendReply(event);
     }
 }
-

@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutionException;
 @Service
 @Slf4j
 public class MusicService {
-
     private final AudioPlayerManager audioManager;
 
     private final Map<Long, GuildMusicManager> managers=new HashMap<>();
@@ -88,4 +87,14 @@ public class MusicService {
 
     }
 
+    public Response nowPlaying(TextChannel textChannel) {
+        GuildMusicManager musicManager = getGuildMusicManager(textChannel.getGuild());
+        AudioTrack track = musicManager.getPlayer().getPlayingTrack();
+
+        if (track == null) {
+            return new Response("No track playing", Response.Type.ERROR, false);
+        }
+
+        return new Response("Now playing: " + track.getInfo().title, Response.Type.OK, false);
+    }
 }
