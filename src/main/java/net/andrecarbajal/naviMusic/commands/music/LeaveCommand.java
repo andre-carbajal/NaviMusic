@@ -3,6 +3,7 @@ package net.andrecarbajal.naviMusic.commands.music;
 import net.andrecarbajal.naviMusic.audio.GuildMusicManager;
 import net.andrecarbajal.naviMusic.audio.MusicService;
 import net.andrecarbajal.naviMusic.commands.SlashCommand;
+import net.andrecarbajal.naviMusic.dto.response.Response;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,6 @@ public class LeaveCommand extends SlashCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;
-        event.deferReply().queue();
 
         GuildMusicManager guildMusicManager = musicManager.getGuildMusicManager(event.getChannel().asTextChannel().getGuild());
         guildMusicManager.getScheduler().clear();
@@ -26,6 +26,6 @@ public class LeaveCommand extends SlashCommand {
 
         event.getGuild().getAudioManager().closeAudioConnection();
 
-        event.reply(String.format("Leaving the voice channel %s", event.getGuild().getAudioManager().getConnectedChannel().getName())).queue();
+        new Response(String.format("Leaving the voice channel: %s", event.getGuild().getAudioManager().getConnectedChannel().getName()), Response.Type.OK, false).sendReply(event);
     }
 }
