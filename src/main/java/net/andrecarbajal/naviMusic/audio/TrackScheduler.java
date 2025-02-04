@@ -65,7 +65,7 @@ public class TrackScheduler extends AudioEventAdapter {
             return;
         }
 
-        if (endReason==AudioTrackEndReason.LOAD_FAILED) {
+        if (endReason == AudioTrackEndReason.LOAD_FAILED) {
             log.error(String.format("Error playing %s (%s)", track.getInfo().title, track.getInfo().uri));
             nextTrack();
         }

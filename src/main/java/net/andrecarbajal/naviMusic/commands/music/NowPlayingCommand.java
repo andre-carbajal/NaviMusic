@@ -17,7 +17,8 @@ public class NowPlayingCommand extends SlashCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;
+        event.deferReply().queue();
 
-        musicService.nowPlaying(event.getChannel().asTextChannel()).sendReply(event);
+        musicService.nowPlaying(event.getChannel().asTextChannel()).editReply(event);
     }
 }

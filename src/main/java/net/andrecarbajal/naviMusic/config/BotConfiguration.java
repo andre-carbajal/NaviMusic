@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.andrecarbajal.naviMusic.commands.SlashCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -41,7 +42,8 @@ public class BotConfiguration extends ListenerAdapter {
     public JDA jda() {
         log.info("Starting Bot");
 
-        if (token.equals("default")) throw new IllegalArgumentException("Bot token not specified in environment / application.properties");
+        if (token.equals("default"))
+            throw new IllegalArgumentException("Bot token not specified in environment / application.properties");
 
         if (!listeners.contains(this)) listeners.add(this);
 
@@ -50,6 +52,7 @@ public class BotConfiguration extends ListenerAdapter {
 
             jda = JDABuilder
                     .createDefault(token)
+                    .setActivity(Activity.customStatus("Navi Music | /help"))
                     .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .build().awaitReady();
@@ -64,7 +67,8 @@ public class BotConfiguration extends ListenerAdapter {
         slashCommands.parallelStream().forEach(slashCommand -> {
             SlashCommandData data = Commands.slash(slashCommand.getName(), slashCommand.getDescription());
 
-            if (slashCommand.getPermission()!=null) data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(slashCommand.getPermission()));
+            if (slashCommand.getPermission() != null)
+                data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(slashCommand.getPermission()));
             data.setGuildOnly(true);
             data.addOptions(slashCommand.getOptionDataList());
             commands.add(data);
