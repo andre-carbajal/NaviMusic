@@ -11,9 +11,9 @@ public class VideoInfo {
 
     public String durationToReadable() {
         long hours = TimeUnit.MILLISECONDS.toHours(info.length);
-        long minute = TimeUnit.MILLISECONDS.toMinutes(info.length) - TimeUnit.HOURS.toMinutes(hours);
-        long second = TimeUnit.MILLISECONDS.toSeconds(info.length) - TimeUnit.MINUTES.toSeconds(minute);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(info.length) - TimeUnit.HOURS.toMinutes(hours);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(info.length) - TimeUnit.MINUTES.toSeconds(minutes);
 
-        return String.format("%d:%02d:%02d", hours, minute, second);
+        return (hours > 0) ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
     }
 }
