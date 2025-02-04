@@ -4,11 +4,13 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -17,7 +19,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 @RequiredArgsConstructor
 public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
-    private final BlockingQueue<AudioTrack> queue=new LinkedBlockingQueue<>();
+    @Getter
+    private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
 
     public void queue(AudioTrack track) {
         log.info("Adding {} in the queue", track.getInfo().title);
@@ -59,6 +62,13 @@ public class TrackScheduler extends AudioEventAdapter {
         return queue.size();
     }
 
+    public void shuffle() {
+        List<AudioTrack> tracks = new ArrayList<>(queue);
+        queue.clear();
+        Collections.shuffle(tracks);
+        tracks.forEach(this::queue);
+    }
+
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
             nextTrack();
@@ -66,7 +76,7 @@ public class TrackScheduler extends AudioEventAdapter {
         }
 
         if (endReason == AudioTrackEndReason.LOAD_FAILED) {
-            log.error(String.format("Error playing %s (%s)", track.getInfo().title, track.getInfo().uri));
+            log.error("Error playing {} ({})", track.getInfo().title, track.getInfo().uri);
             nextTrack();
         }
     }
