@@ -1,5 +1,6 @@
 package net.andrecarbajal.naviMusic.audio;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -21,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 public class MusicService {
     private final AudioPlayerManager audioManager;
 
-    private final Map<Long, GuildMusicManager> managers=new HashMap<>();
+    private final Map<Long, GuildMusicManager> managers = new HashMap<>();
 
     public MusicService(@Lazy AudioPlayerManager audioManager) {
         this.audioManager = audioManager;
@@ -96,5 +97,23 @@ public class MusicService {
         }
 
         return new Response("Now playing: " + track.getInfo().title, Response.Type.OK, false);
+    }
+
+    public Response pausePlaying(TextChannel textChannel) {
+        GuildMusicManager musicManager = getGuildMusicManager(textChannel.getGuild());
+        AudioPlayer player = musicManager.getPlayer();
+        if (player.isPaused()) return new Response("Already paused", Response.Type.ERROR, false);
+
+        player.setPaused(true);
+        return new Response("Paused", Response.Type.OK, false);
+    }
+
+    public Response continuePlaying(TextChannel textChannel) {
+        GuildMusicManager musicManager = getGuildMusicManager(textChannel.getGuild());
+        AudioPlayer player = musicManager.getPlayer();
+        if (!player.isPaused()) return new Response("Already playing", Response.Type.ERROR, false);
+
+        player.setPaused(false);
+        return new Response("Continuing", Response.Type.OK, false);
     }
 }
