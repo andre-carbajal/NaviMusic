@@ -46,7 +46,6 @@ public class AudioConfig extends ListenerAdapter {
                 new AndroidVrWithThumbnail(),
                 new WebWithThumbnail(),
                 new WebEmbeddedWithThumbnail(),
-                new Android(),
                 new IosWithThumbnail()
                 );
 
