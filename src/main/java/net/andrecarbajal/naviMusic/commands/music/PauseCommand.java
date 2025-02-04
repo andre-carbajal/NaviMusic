@@ -17,8 +17,7 @@ public class PauseCommand extends SlashCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;
-        event.deferReply().queue();
 
-        musicService.pausePlaying(event.getChannel().asTextChannel()).editReply(event);
+        musicService.pausePlaying(event.getChannel().asTextChannel()).sendReply(event);
     }
 }
