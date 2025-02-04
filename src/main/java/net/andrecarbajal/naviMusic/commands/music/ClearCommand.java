@@ -21,4 +21,3 @@ public class ClearCommand extends SlashCommand {
         musicService.clear(event.getGuild()).sendReply(event);
     }
 }
-

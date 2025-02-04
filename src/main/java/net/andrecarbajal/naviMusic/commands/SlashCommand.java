@@ -1,10 +1,10 @@
 package net.andrecarbajal.naviMusic.commands;
 
-import net.andrecarbajal.naviMusic.dto.response.Response;
-import net.andrecarbajal.naviMusic.dto.response.RichResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import net.andrecarbajal.naviMusic.dto.response.Response;
+import net.andrecarbajal.naviMusic.dto.response.RichResponse;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
