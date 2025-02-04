@@ -64,7 +64,7 @@ public class BotConfiguration extends ListenerAdapter {
         }
 
         Set<CommandData> commands = new HashSet<>();
-        slashCommands.parallelStream().forEach(slashCommand -> {
+        slashCommands.forEach(slashCommand -> {
             SlashCommandData data = Commands.slash(slashCommand.getName(), slashCommand.getDescription());
 
             if (slashCommand.getPermission() != null)

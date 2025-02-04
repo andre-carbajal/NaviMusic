@@ -6,11 +6,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.springframework.stereotype.Component;
 
 @Component
-public class ContinueCommand extends SlashCommand {
+public class ResumeCommand extends SlashCommand {
     private final MusicService musicService;
 
-    public ContinueCommand(MusicService musicService) {
-        super("continue", "Continues the music");
+    public ResumeCommand(MusicService musicService) {
+        super("resume", "Resumes music");
         this.musicService = musicService;
     }
 
@@ -19,6 +19,6 @@ public class ContinueCommand extends SlashCommand {
         if (noVoiceChannelCheck(event)) return;
         event.deferReply().queue();
 
-        musicService.continuePlaying(event.getChannel().asTextChannel()).editReply(event);
+        musicService.resume(event.getChannel().asTextChannel()).editReply(event);
     }
 }

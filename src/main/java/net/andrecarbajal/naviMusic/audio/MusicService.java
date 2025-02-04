@@ -106,7 +106,7 @@ public class MusicService {
         return new Response("Now playing: " + track.getInfo().title, Response.Type.OK, false);
     }
 
-    public Response pausePlaying(TextChannel textChannel) {
+    public Response pause(TextChannel textChannel) {
         GuildMusicManager musicManager = getGuildMusicManager(textChannel.getGuild());
         AudioPlayer player = musicManager.getPlayer();
         if (player.isPaused()) return new Response("Already paused", Response.Type.ERROR, false);
@@ -115,12 +115,12 @@ public class MusicService {
         return new Response("Paused", Response.Type.OK, false);
     }
 
-    public Response continuePlaying(TextChannel textChannel) {
+    public Response resume(TextChannel textChannel) {
         GuildMusicManager musicManager = getGuildMusicManager(textChannel.getGuild());
         AudioPlayer player = musicManager.getPlayer();
         if (!player.isPaused()) return new Response("Already playing", Response.Type.ERROR, false);
 
         player.setPaused(false);
-        return new Response("Continuing", Response.Type.OK, false);
+        return new Response("Resumed ", Response.Type.OK, false);
     }
 }
