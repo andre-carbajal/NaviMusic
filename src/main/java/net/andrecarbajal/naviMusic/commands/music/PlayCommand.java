@@ -16,7 +16,7 @@ public class PlayCommand extends SlashCommand {
     private final MusicService musicService;
 
     public PlayCommand(MusicService musicService) {
-        super("play", "Play track or playlist");
+        super("play", "Play track or playlist", Category.MUSIC);
         addOption(new OptionData(OptionType.STRING, "name-url-playlist", "Link or search query", true));
         this.musicService = musicService;
     }

@@ -12,7 +12,7 @@ public class RepeatOffCommand extends SlashCommand {
     private final MusicService musicService;
 
     public RepeatOffCommand(MusicService musicService) {
-        super("repeat-off", "Stop repeating current song");
+        super("repeat-off", "Stop repeating current song", Category.MUSIC);
         this.musicService = musicService;
     }
 

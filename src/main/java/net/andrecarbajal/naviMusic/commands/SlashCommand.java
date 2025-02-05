@@ -18,8 +18,14 @@ import java.util.List;
 public abstract class SlashCommand {
     private final String name;
     private final String description;
+    private final Category category;
     private Permission permission;
     private List<OptionData> optionDataList = new ArrayList<>();
+
+    protected enum Category {
+        GENERAL,
+        MUSIC
+    }
 
     protected void addOption(OptionData optionData) {
         optionDataList.add(optionData);

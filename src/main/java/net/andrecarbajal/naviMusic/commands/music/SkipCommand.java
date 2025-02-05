@@ -12,7 +12,7 @@ public class SkipCommand extends SlashCommand {
     private final MusicService musicService;
 
     public SkipCommand(MusicService musicService) {
-        super("skip", "Skip/remove first song from queue");
+        super("skip", "Skip/remove first song from queue", Category.MUSIC);
         addOption(new OptionData(OptionType.INTEGER, "position", "Position in queue to skip", false));
         this.musicService = musicService;
     }

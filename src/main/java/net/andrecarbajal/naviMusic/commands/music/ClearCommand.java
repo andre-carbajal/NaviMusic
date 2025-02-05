@@ -10,7 +10,7 @@ public class ClearCommand extends SlashCommand {
     private final MusicService musicService;
 
     public ClearCommand(MusicService musicService) {
-        super("clear", "Clear the queue");
+        super("clear", "Clear the queue", Category.MUSIC);
         this.musicService = musicService;
     }
 

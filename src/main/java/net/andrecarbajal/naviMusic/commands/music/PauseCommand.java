@@ -10,7 +10,7 @@ public class PauseCommand extends SlashCommand {
     private final MusicService musicService;
 
     public PauseCommand(MusicService musicService) {
-        super("pause", "Pauses music");
+        super("pause", "Pauses music", Category.MUSIC);
         this.musicService = musicService;
     }
 

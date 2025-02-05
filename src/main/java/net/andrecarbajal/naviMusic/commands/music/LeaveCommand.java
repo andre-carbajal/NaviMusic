@@ -12,7 +12,7 @@ public class LeaveCommand extends SlashCommand {
     private final MusicService musicManager;
 
     public LeaveCommand(MusicService musicManager) {
-        super("leave", "Will make the bot leave the voice channel");
+        super("leave", "Will make the bot leave the voice channel", Category.MUSIC);
         this.musicManager = musicManager;
     }
 

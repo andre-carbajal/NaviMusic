@@ -12,7 +12,7 @@ public class RepeatCommand extends SlashCommand {
     private final MusicService musicService;
 
     public RepeatCommand(MusicService musicService) {
-        super("repeat", "Repeats the current track");
+        super("repeat", "Repeats the current track", Category.MUSIC);
         this.musicService = musicService;
     }
 

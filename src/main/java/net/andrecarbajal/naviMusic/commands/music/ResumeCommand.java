@@ -10,7 +10,7 @@ public class ResumeCommand extends SlashCommand {
     private final MusicService musicService;
 
     public ResumeCommand(MusicService musicService) {
-        super("resume", "Resumes music");
+        super("resume", "Resumes music", Category.MUSIC);
         this.musicService = musicService;
     }
 

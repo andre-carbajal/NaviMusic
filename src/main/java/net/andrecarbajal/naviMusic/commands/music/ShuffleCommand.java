@@ -11,7 +11,7 @@ public class ShuffleCommand extends SlashCommand {
     private final MusicService musicService;
 
     public ShuffleCommand(MusicService musicService) {
-        super("shuffle", "Shuffles the queue");
+        super("shuffle", "Shuffles the queue", Category.MUSIC);
         this.musicService = musicService;
     }
 

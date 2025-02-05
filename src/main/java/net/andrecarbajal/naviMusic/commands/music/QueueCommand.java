@@ -16,7 +16,7 @@ public class QueueCommand extends SlashCommand {
     private final MusicService musicManager;
 
     public QueueCommand(MusicService musicManager) {
-        super("queue", "Display list of songs in queue");
+        super("queue", "Display list of songs in queue", Category.MUSIC);
         this.musicManager = musicManager;
     }
 

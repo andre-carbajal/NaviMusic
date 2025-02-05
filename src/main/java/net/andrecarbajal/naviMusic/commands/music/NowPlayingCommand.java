@@ -10,7 +10,7 @@ public class NowPlayingCommand extends SlashCommand {
     private final MusicService musicService;
 
     public NowPlayingCommand(MusicService musicService) {
-        super("nowplaying", "Will display the current playing song");
+        super("nowplaying", "Will display the current playing song", Category.MUSIC);
         this.musicService = musicService;
     }
 
