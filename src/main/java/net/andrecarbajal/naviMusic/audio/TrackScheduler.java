@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Member;
 
@@ -21,6 +22,9 @@ public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
     @Getter
     private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
+    @Getter
+    @Setter
+    private boolean repeating = false;
 
     public void queue(AudioTrack track) {
         log.info("Adding {} in the queue", track.getInfo().title);
@@ -71,6 +75,10 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
+            if (repeating) {
+                player.startTrack(track.makeClone(), false);
+                return;
+            }
             nextTrack();
             return;
         }
