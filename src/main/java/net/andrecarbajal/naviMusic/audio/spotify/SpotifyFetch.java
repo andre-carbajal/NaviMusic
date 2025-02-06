@@ -1,7 +1,8 @@
 package net.andrecarbajal.naviMusic.audio.spotify;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
 import se.michaelthelin.spotify.model_objects.specification.*;
@@ -13,24 +14,20 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
-
+@Slf4j
+@Component
 public class SpotifyFetch {
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final SpotifyApi spotify;
 
-    public SpotifyFetch() {
-        this.spotify = new SpotifyApi.Builder()
-                .setClientId(System.getenv("SPOTIFY_CLIENT_ID"))
-                .setClientSecret(System.getenv("SPOTIFY_SECRET"))
-                .build();
+    public SpotifyFetch(@Value("${app.spotify.clientId}") String clientId, @Value("${app.spotify.clientSecret}") String clientSecret) {
+        this.spotify = new SpotifyApi.Builder().setClientId(clientId).setClientSecret(clientSecret).build();
 
         try {
-            ClientCredentialsRequest.Builder request = new ClientCredentialsRequest.Builder
-                    (spotify.getClientId(), spotify.getClientSecret());
-            ClientCredentials creds = request.grant_type("client_credentials").build().execute();
-            spotify.setAccessToken(creds.getAccessToken());
+            ClientCredentialsRequest clientCredentialsRequest = spotify.clientCredentials().build();
+            ClientCredentials clientCredentials = clientCredentialsRequest.execute();
+            spotify.setAccessToken(clientCredentials.getAccessToken());
         } catch (Exception e) {
-            LOGGER.error("Error init spotify api: {}", e.getMessage());
+            log.error("Error init spotify api: {}", e.getMessage());
         }
     }
 
@@ -42,7 +39,7 @@ public class SpotifyFetch {
             Track track = trackFuture.join();
             return new SpotifySong(track.getName(), track.getArtists());
         } catch (Exception e) {
-            LOGGER.error(String.format("Error when fetching spotify song `%s`: %s", getID(url), e.getMessage()));
+            log.error("Error when fetching spotify song `{}`: {}", getID(url), e.getMessage());
             return null;
         }
     }
@@ -58,8 +55,7 @@ public class SpotifyFetch {
             List<Track> tracks = new ArrayList<>();
             if (songIDs.size() > 50) {
                 for (int i = 1; i <= Math.ceil((double) songIDs.size() / 50); i++) {
-                    String test = String.join(",", songIDs.subList(50 * (i - 1),
-                            Math.min(50 * i, songIDs.size())));
+                    String test = String.join(",", songIDs.subList(50 * (i - 1), Math.min(50 * i, songIDs.size())));
                     CompletableFuture<Track[]> trackFuture = spotify.getSeveralTracks(test).build().executeAsync();
                     Track[] temp = trackFuture.join();
                     Collections.addAll(tracks, temp);
@@ -72,7 +68,7 @@ public class SpotifyFetch {
 
             return new SpotifyPlaylist(playlist.getName(), songs.toArray(SpotifySong[]::new));
         } catch (Exception e) {
-            LOGGER.error(String.format("Error when fetching spotify playlist `%s`: %s", getID(url), e.getMessage()));
+            log.error("Error when fetching spotify playlist `{}`: {}", getID(url), e.getMessage());
             return null;
         }
     }
@@ -87,17 +83,15 @@ public class SpotifyFetch {
 
             return new SpotifyPlaylist(album.getName(), songs.toArray(SpotifySong[]::new));
         } catch (Exception e) {
-            LOGGER.error(String.format("Error when fetching spotify album `%s`: %s", getID(url), e.getMessage()));
+            log.error("Error when fetching spotify album `{}`: {}", getID(url), e.getMessage());
             return null;
         }
     }
 
     private String getID(String link) {
-        if (!ifValidSpotifyLink(link))
-            return "";
+        if (!ifValidSpotifyLink(link)) return "";
 
-        if (link.contains("?"))
-            return link.substring(link.lastIndexOf("/") + 1, link.indexOf("?"));
+        if (link.contains("?")) return link.substring(link.lastIndexOf("/") + 1, link.indexOf("?"));
 
         return link.substring(link.lastIndexOf("/"));
     }

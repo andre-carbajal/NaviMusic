@@ -24,7 +24,7 @@ public class EmbedCreator {
     public static EmbedBuilder createEmbedPlaylist(EmbedBuilder embed, String trackUrl, SpotifyPlaylist playlist) {
         embed.addField("", "\nPlaylist added to queue:", false);
         embed.addField("", "\n**URL:** `" + trackUrl + "`", false);
-        embed.addField("", "\n**Songs added to queue:** `" + playlist.getSongs().length + "`", false);
+        embed.addField("", "\n**Songs added to queue:** `" + playlist.songs().length + "`", false);
         return embed;
     }
 

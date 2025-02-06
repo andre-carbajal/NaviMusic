@@ -1,4 +1,4 @@
-package net.andrecarbajal.naviMusic.audio;
+package net.andrecarbajal.naviMusic.audio.resultHandler;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.andrecarbajal.naviMusic.audio.MusicService;
 import net.andrecarbajal.naviMusic.dto.VideoInfo;
 import net.andrecarbajal.naviMusic.dto.response.Response;
 import net.andrecarbajal.naviMusic.dto.response.RichResponse;

@@ -29,7 +29,7 @@ public class QueueCommand extends SlashCommand {
         List<AudioTrack> queue = guildMusicManager.getScheduler().getQueue().stream().toList();
 
         if (queue.isEmpty()) {
-            event.reply("Queue is empty").queue();
+            new Response("Queue is empty", Response.Type.OK, false).editReply(event);
             return;
         }
 
