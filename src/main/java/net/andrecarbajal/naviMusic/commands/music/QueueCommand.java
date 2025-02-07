@@ -22,7 +22,7 @@ public class QueueCommand extends SlashCommand {
         super("queue", "Display list of songs in queue", Category.MUSIC);
         this.musicManager = musicManager;
     }
-    
+
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;

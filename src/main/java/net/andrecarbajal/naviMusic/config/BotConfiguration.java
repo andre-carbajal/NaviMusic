@@ -33,7 +33,7 @@ public class BotConfiguration extends ListenerAdapter {
 
     private final List<ListenerAdapter> listeners;
 
-    @Value("${app.token}")
+    @Value("${app.discord.token}")
     private String token;
 
     private JDA jda;
