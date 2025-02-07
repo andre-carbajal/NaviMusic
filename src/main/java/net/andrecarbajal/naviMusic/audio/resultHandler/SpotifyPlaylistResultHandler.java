@@ -11,10 +11,6 @@ import net.andrecarbajal.naviMusic.dto.response.Response;
 import net.andrecarbajal.naviMusic.dto.response.RichResponse;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class SpotifyPlaylistResultHandler implements AudioLoadResultHandler {
