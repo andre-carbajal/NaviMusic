@@ -8,6 +8,7 @@ import net.andrecarbajal.naviMusic.commands.SlashCommand;
 import net.andrecarbajal.naviMusic.dto.VideoInfo;
 import net.andrecarbajal.naviMusic.dto.response.Response;
 import net.andrecarbajal.naviMusic.dto.response.RichResponse;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +22,7 @@ public class QueueCommand extends SlashCommand {
         super("queue", "Display list of songs in queue", Category.MUSIC);
         this.musicManager = musicManager;
     }
-
-    private Response response;
-
+    
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (noVoiceChannelCheck(event)) return;
@@ -51,16 +50,16 @@ public class QueueCommand extends SlashCommand {
         for (int i = 0; i < Math.min(15, totalSongs); i++) {
             AudioTrack track = queue.get(i);
             AudioTrackInfo info = track.getInfo();
-            builder.append(String.format("%d. %s (%s)\n", i + 1, info.title, new VideoInfo(info).durationToReadable()));
+            builder.append(String.format("%d. %s `[%s]`\n", i + 1, info.title, new VideoInfo(info).durationToReadable()));
         }
 
         if (totalSongs > 15) {
-            builder.append("\nAnd ").append(totalSongs - 15).append(" more...");
+            builder.append("And ").append(totalSongs - 15).append(" more...");
         }
 
-        builder.append(String.format("\nTotal songs: %d\n", totalSongs));
-        builder.append(String.format("Total duration: %s", new VideoInfo(totalDuration).durationToReadableFromDuration()));
-
-        RichResponse.builder().title("Queue").text(builder.toString()).build().editReply(event);
+        RichResponse.builder().title("Queue").text(builder.toString()).fields(
+                List.of(new MessageEmbed.Field("Total songs", String.valueOf(totalSongs), true),
+                        new MessageEmbed.Field("Total duration", new VideoInfo(totalDuration).durationToReadableFromDuration(), true))
+        ).build().editReply(event);
     }
 }
