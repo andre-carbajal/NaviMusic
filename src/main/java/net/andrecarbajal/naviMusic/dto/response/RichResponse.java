@@ -58,7 +58,7 @@ public class RichResponse extends Response {
         if (fields != null) fields.forEach(eb::addField);
 
         if (image != null) eb.setImage(image);
-        if (thumbnail != null) eb.setThumbnail(thumbnail);
+        if (thumbnail == null) eb.setThumbnail("https://i.imgur.com/xiiGqIO.png");
 
         if (author != null) eb.setAuthor(author.getName(), author.getAvatarUrl(), author.getUrl());
         if (footer != null) eb.setFooter(footer.getText(), footer.getImageUrl());

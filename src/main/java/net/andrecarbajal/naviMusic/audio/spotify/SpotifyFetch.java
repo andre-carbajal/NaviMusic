@@ -37,7 +37,7 @@ public class SpotifyFetch {
             String id = getID(url);
             CompletableFuture<Track> trackFuture = spotify.getTrack(id).build().executeAsync();
             Track track = trackFuture.join();
-            return new SpotifySong(track.getName(), track.getArtists());
+            return new SpotifySong(track.getName(), track.getArtists(), uriToUrl(track.getUri()));
         } catch (Exception e) {
             log.error("Error when fetching spotify song `{}`: {}", getID(url), e.getMessage());
             return null;
@@ -64,7 +64,7 @@ public class SpotifyFetch {
 
             List<SpotifySong> songs = new ArrayList<>();
             for (Track track : tracks)
-                songs.add(new SpotifySong(track.getName(), track.getArtists()));
+                songs.add(new SpotifySong(track.getName(), track.getArtists(), uriToUrl(track.getUri())));
 
             return new SpotifyPlaylist(playlist.getName(), songs.toArray(SpotifySong[]::new));
         } catch (Exception e) {
@@ -79,13 +79,17 @@ public class SpotifyFetch {
             CompletableFuture<Album> albumFuture = spotify.getAlbum(getID(url)).build().executeAsync();
             Album album = albumFuture.get();
             for (TrackSimplified track : album.getTracks().getItems())
-                songs.add(new SpotifySong(track.getName(), track.getArtists()));
+                songs.add(new SpotifySong(track.getName(), track.getArtists(), uriToUrl(track.getUri())));
 
             return new SpotifyPlaylist(album.getName(), songs.toArray(SpotifySong[]::new));
         } catch (Exception e) {
             log.error("Error when fetching spotify album `{}`: {}", getID(url), e.getMessage());
             return null;
         }
+    }
+
+    private String uriToUrl(String uri) {
+        return "https://open.spotify.com/track/" + uri.substring(uri.lastIndexOf(":") + 1);
     }
 
     private String getID(String link) {

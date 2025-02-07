@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,26 +38,25 @@ public class AudioResultHandler implements AudioLoadResultHandler {
 
     @Override
     public void trackLoaded(AudioTrack track) {
-        String uri = track.getInfo().uri;
+        AudioTrackInfo trackInfo = track.getInfo();
 
         RichResponse r = new RichResponse();
 
-        r.setColor(new Color(0, 51, 102));
         r.setTitle("Song added to queue");
-        r.setText(String.format("[%s](%s) de `%s`", track.getInfo().title.trim(), uri, track.getInfo().author));
+        r.setText(String.format("[%s](%s) de `%s`", trackInfo.title.trim(), trackInfo.uri, trackInfo.author));
 
         List<MessageEmbed.Field> fields = new ArrayList<>();
-        fields.add(new MessageEmbed.Field("Duration", new VideoInfo(track.getInfo()).durationToReadable(), true));
+        fields.add(new MessageEmbed.Field("Duration", new VideoInfo(trackInfo).durationToReadable(), true));
 
-        int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize()+1;
-        fields.add(new MessageEmbed.Field("In queue", String.format(size==1?"%d song":"%d songs", size), true));
+        int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize() + 1;
+        fields.add(new MessageEmbed.Field("In queue", String.format(size == 1 ? "%d song" : "%d songs", size), true));
 
         r.setFields(fields);
 
         r.setFooter(new RichResponse.Footer(String.format("Added by %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
 
         if (track.getSourceManager() instanceof YoutubeAudioSourceManager) {
-            URLUtils.getURLParam(uri, "v").ifPresent(s -> r.setThumbnail(String.format("https://img.youtube.com/vi/%s/maxresdefault.jpg", s)));
+            URLUtils.getURLParam(track.getInfo().uri, "v").ifPresent(s -> r.setThumbnail(String.format("https://img.youtube.com/vi/%s/maxresdefault.jpg", s)));
         }
 
         response = r;
@@ -79,17 +78,15 @@ public class AudioResultHandler implements AudioLoadResultHandler {
 
         RichResponse r = new RichResponse();
 
-        r.setColor(new Color(0, 51, 102));
         r.setTitle("Playlist added to queue");
-
-        r.setText(String.format("%s", playlist.getName()));
+        r.setText(playlist.getName());
 
         int playlistSize = playlist.getTracks().size();
         List<MessageEmbed.Field> fields = new ArrayList<>();
         fields.add(new MessageEmbed.Field("Songs added", String.valueOf(playlistSize), true));
 
-        int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize()+playlistSize;
-        fields.add(new MessageEmbed.Field("In queue", String.format(size==1?"%d song":"%d songs", size), true));
+        int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize() + playlistSize;
+        fields.add(new MessageEmbed.Field("In queue", String.format(size == 1 ? "%d song" : "%d songs", size), true));
 
         r.setFields(fields);
 
@@ -109,7 +106,7 @@ public class AudioResultHandler implements AudioLoadResultHandler {
 
         r.setType(Response.Type.USER_ERROR);
         r.setText("Nothing found");
-        response=r;
+        response = r;
     }
 
     @Override
@@ -119,6 +116,6 @@ public class AudioResultHandler implements AudioLoadResultHandler {
         RichResponse r = new RichResponse();
         r.setType(Response.Type.ERROR);
         r.setText("Internal error");
-        response=r;
+        response = r;
     }
 }

@@ -6,19 +6,24 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.extern.slf4j.Slf4j;
 import net.andrecarbajal.naviMusic.audio.resultHandler.AudioResultHandler;
-import net.andrecarbajal.naviMusic.audio.resultHandler.SpotifyResultHandler;
+import net.andrecarbajal.naviMusic.audio.resultHandler.SpotifyPlaylistResultHandler;
+import net.andrecarbajal.naviMusic.audio.resultHandler.SpotifyTrackResultHandler;
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifyFetch;
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifyPlaylist;
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifySong;
 import net.andrecarbajal.naviMusic.dto.response.Response;
+import net.andrecarbajal.naviMusic.dto.response.RichResponse;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -69,32 +74,52 @@ public class MusicService {
 
             if (song == null) return new Response("Error fetching spotify song", Response.Type.ERROR, false);
 
-            SpotifyResultHandler spotifyResultHandler = new SpotifyResultHandler(this, channel.getGuild(), member);
-            audioManager.loadItemOrdered(musicManager, String.format("%s: %s", provider, song), spotifyResultHandler).get();
+            SpotifyTrackResultHandler spotifyTrackResultHandler = new SpotifyTrackResultHandler(this, channel.getGuild(), member, song);
+            audioManager.loadItemOrdered(musicManager, String.format("%s: %s", provider, song), spotifyTrackResultHandler).get();
 
-            return spotifyResultHandler.getResponse();
+            return spotifyTrackResultHandler.getResponse();
         }
 
         if (trackUrl.toUpperCase().contains("playlist".toUpperCase())) {
             SpotifyPlaylist playlist = spotifyFetch.fetchPlaylist(trackUrl);
             loadSpotifySongs(playlist, channel, member, provider);
-            return new Response("Loading playlist", Response.Type.OK, false);
+            return spotifyResponse(this, channel.getGuild(), member, playlist, "playlist");
         }
 
         if (trackUrl.toUpperCase().contains("album".toUpperCase())) {
             SpotifyPlaylist playlist = spotifyFetch.fetchAlbum(trackUrl);
             loadSpotifySongs(playlist, channel, member, provider);
-            return new Response("Loading album", Response.Type.OK, false);
+            return spotifyResponse(this, channel.getGuild(), member, playlist, "album");
         }
         return new Response("Couldn't find spotify link", Response.Type.ERROR, false);
+    }
+
+    private Response spotifyResponse(MusicService musicService, Guild guild, Member member, SpotifyPlaylist playlist, String type) {
+        RichResponse r = new RichResponse();
+
+        r.setTitle(String.format("Adding Spotify %s to queue", type));
+        r.setText(playlist.title());
+
+        int playlistSize = playlist.songs().length;
+        List<MessageEmbed.Field> fields = new ArrayList<>();
+        fields.add(new MessageEmbed.Field("Songs", String.format("%d songs", playlistSize), true));
+
+        int size = musicService.getGuildMusicManager(guild).getScheduler().getQueueSize() + playlistSize;
+        fields.add(new MessageEmbed.Field("In queue", String.format(size == 1 ? "%d song" : "%d songs", size), true));
+
+        r.setFields(fields);
+
+        r.setFooter(new RichResponse.Footer(String.format("Added by %s", member.getEffectiveName()), member.getEffectiveAvatarUrl()));
+
+        return r;
     }
 
     private void loadSpotifySongs(SpotifyPlaylist playlist, TextChannel channel, Member member, String provider) {
         for (SpotifySong song : playlist.songs()) {
             log.warn("Loading song: {}", song.toString());
             GuildMusicManager musicManager = getGuildMusicManager(channel.getGuild());
-            SpotifyResultHandler spotifyResultHandler = new SpotifyResultHandler(this, channel.getGuild(), member);
-            audioManager.loadItemOrdered(musicManager, String.format("%s: %s", provider, song), spotifyResultHandler);
+            SpotifyPlaylistResultHandler spotifyPlaylistResultHandler = new SpotifyPlaylistResultHandler(this, channel.getGuild(), member);
+            audioManager.loadItemOrdered(musicManager, String.format("%s: %s", provider, song), spotifyPlaylistResultHandler);
         }
     }
 
