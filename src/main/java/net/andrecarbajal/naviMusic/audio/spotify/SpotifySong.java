@@ -2,7 +2,7 @@ package net.andrecarbajal.naviMusic.audio.spotify;
 
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 
-public record SpotifySong(String title, ArtistSimplified[] artists, String url) {
+public record SpotifySong(String title, ArtistSimplified[] artists) {
 
     public String getArtists() {
         StringBuilder artists = new StringBuilder();

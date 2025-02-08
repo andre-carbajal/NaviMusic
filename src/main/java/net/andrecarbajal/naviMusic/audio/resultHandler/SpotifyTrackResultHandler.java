@@ -48,7 +48,7 @@ public class SpotifyTrackResultHandler implements AudioLoadResultHandler {
             RichResponse r = new RichResponse();
 
             r.setTitle("Adding Spotify song to queue");
-            r.setText(String.format("[%s](%s) by `%s`", song.title(), song.url(), song.getArtists()));
+            r.setText(String.format("%s by `%s`", song.title(), song.getArtists()));
 
             List<MessageEmbed.Field> fields = new ArrayList<>();
             fields.add(new MessageEmbed.Field("Duration", new VideoInfo(playlist.getTracks().getFirst().getInfo()).durationToReadable(), true));

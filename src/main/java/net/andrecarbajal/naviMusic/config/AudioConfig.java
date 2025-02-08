@@ -49,9 +49,11 @@ public class AudioConfig extends ListenerAdapter {
                 new IosWithThumbnail()
                 );
 
-        youtube.useOauth2(oAuthToken, true);
-
-
+        if (!oAuthToken.equals("null")){
+            youtube.useOauth2(oAuthToken, true);
+        } else {
+            youtube.useOauth2(null, false);
+        }
 
         playerManager.registerSourceManager(youtube);
 
