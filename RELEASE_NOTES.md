@@ -1,3 +1,3 @@
 # Release Notes
 
-- Updating project dependencies to the latest versions.
+- Docker image now support amd64 and arm64 architectures.
