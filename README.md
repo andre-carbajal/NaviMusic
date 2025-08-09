@@ -43,7 +43,7 @@ Finally execute the bot with all the environment variables(DISCORD_TOKEN, SPOTIF
     - SPOTIFY_CLIENT_SECRET: Your Spotify secret
     - YOUTUBE_POTOKEN: Your Youtube PO token
     - YOUTUBE_VISITOR: Your Youtube visitor
-    - YOUTUBE_OAUTH2_CODE: Your Youtube OAuth2 code
+    - YOUTUBE_OAUTH2: Your Youtube OAuth2 code
 - Run the bot
 
 ```bash
@@ -61,7 +61,7 @@ docker pull anvian/navi-music
 - Run the Docker container, passing your Discord, Spotify Client ID, and Spotify Secret tokens as arguments:
 
 ```bash
-docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_CLIENT_SECRET=your_spotify_secret YOUTUBE_POTOKEN=your_youtube_potoken YOUTUBE_VISITOR=your_youtube_visitor YOUTUBE_OAUTH2_CODE=your_youtube_oauth2_code
+docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_CLIENT_SECRET=your_spotify_secret YOUTUBE_POTOKEN=your_youtube_potoken YOUTUBE_VISITOR=your_youtube_visitor YOUTUBE_OAUTH2=your_youtube_oauth2_code
 ```
 
 ## License
