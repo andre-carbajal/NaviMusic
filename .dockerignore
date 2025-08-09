@@ -1,0 +1,56 @@
+# Version control
+.git/
+.gitignore
+.hg/
+.svn/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Java build output
+/target/
+*.class
+
+# Build outputs (generic)
+dist/
+build/
+out/
+debug/
+*.log
+
+# Test and temporary files
+test/
+tests/
+*_test.go
+tmp/
+temp/
+*.tmp
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Documentation
+README*
+*.md
+LICENSE
+
+# Docker files
+docker-compose*
+Dockerfile*
+
+# Local development
+.local/
+local/
+
+# Project-specific
+.DS_Store
