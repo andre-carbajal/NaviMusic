@@ -60,6 +60,11 @@ public class SpotifyFetch {
                     Track[] temp = trackFuture.join();
                     Collections.addAll(tracks, temp);
                 }
+            } else if (!songIDs.isEmpty()) {
+                String test = String.join(",", songIDs);
+                CompletableFuture<Track[]> trackFuture = spotify.getSeveralTracks(test).build().executeAsync();
+                Track[] temp = trackFuture.join();
+                Collections.addAll(tracks, temp);
             }
 
             List<SpotifySong> songs = new ArrayList<>();
