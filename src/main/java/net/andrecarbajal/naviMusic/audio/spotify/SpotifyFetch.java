@@ -1,12 +1,13 @@
 package net.andrecarbajal.naviMusic.audio.spotify;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import se.michaelthelin.spotify.SpotifyApi;
-import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
-import se.michaelthelin.spotify.model_objects.specification.*;
-import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
+import se.michaelthelin.spotify.model_objects.specification.Album;
+import se.michaelthelin.spotify.model_objects.specification.Playlist;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.Track;
+import se.michaelthelin.spotify.model_objects.specification.TrackSimplified;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,24 +18,16 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class SpotifyFetch {
-    private final SpotifyApi spotify;
+    private final SpotifyTokenProvider tokenProvider;
 
-    public SpotifyFetch(@Value("${app.spotify.clientId}") String clientId, @Value("${app.spotify.clientSecret}") String clientSecret) {
-        this.spotify = new SpotifyApi.Builder().setClientId(clientId).setClientSecret(clientSecret).build();
-
-        try {
-            ClientCredentialsRequest clientCredentialsRequest = spotify.clientCredentials().build();
-            ClientCredentials clientCredentials = clientCredentialsRequest.execute();
-            spotify.setAccessToken(clientCredentials.getAccessToken());
-        } catch (Exception e) {
-            log.error("Error init spotify api: {}", e.getMessage());
-        }
+    public SpotifyFetch(SpotifyTokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
     }
-
 
     public SpotifySong fetchSong(String url) {
         try {
             String id = getID(url);
+            SpotifyApi spotify = tokenProvider.getSpotifyApi();
             CompletableFuture<Track> trackFuture = spotify.getTrack(id).build().executeAsync();
             Track track = trackFuture.join();
             return new SpotifySong(track.getName(), track.getArtists());
@@ -47,6 +40,7 @@ public class SpotifyFetch {
     public SpotifyPlaylist fetchPlaylist(String url) {
         try {
             List<String> songIDs = new ArrayList<>();
+            SpotifyApi spotify = tokenProvider.getSpotifyApi();
             CompletableFuture<Playlist> playlistFuture = spotify.getPlaylist(getID(url)).build().executeAsync();
             Playlist playlist = playlistFuture.join();
             for (PlaylistTrack track : playlist.getTracks().getItems())
@@ -81,6 +75,7 @@ public class SpotifyFetch {
     public SpotifyPlaylist fetchAlbum(String url) {
         try {
             List<SpotifySong> songs = new ArrayList<>();
+            SpotifyApi spotify = tokenProvider.getSpotifyApi();
             CompletableFuture<Album> albumFuture = spotify.getAlbum(getID(url)).build().executeAsync();
             Album album = albumFuture.get();
             for (TrackSimplified track : album.getTracks().getItems())

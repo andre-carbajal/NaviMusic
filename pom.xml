@@ -6,12 +6,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
     <groupId>net.andrecarbajal</groupId>
     <artifactId>NaviMusic</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.3</version>
     <name>NaviMusic</name>
 
     <properties>
