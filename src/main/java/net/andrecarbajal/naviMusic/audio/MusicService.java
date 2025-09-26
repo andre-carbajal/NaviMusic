@@ -41,7 +41,7 @@ public class MusicService {
     }
 
     public GuildMusicManager getGuildMusicManager(Guild guild) {
-        GuildMusicManager musicManager = managers.computeIfAbsent(guild.getIdLong(), a -> new GuildMusicManager(audioManager));
+        GuildMusicManager musicManager = managers.computeIfAbsent(guild.getIdLong(), a -> new GuildMusicManager(audioManager, guild));
 
         guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
 

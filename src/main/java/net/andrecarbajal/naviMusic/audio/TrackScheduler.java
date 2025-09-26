@@ -8,26 +8,36 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
 public class TrackScheduler extends AudioEventAdapter {
     private final AudioPlayer player;
+    private final Guild guild;
     @Getter
     private final BlockingQueue<AudioTrack> queue = new LinkedBlockingQueue<>();
     @Getter
     @Setter
     private boolean repeating = false;
 
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> disconnectTask;
+
     public void queue(AudioTrack track) {
         log.info("Adding {} in the queue", track.getInfo().title);
+        cancelDisconnectTimer();
         if (player.startTrack(track, true)) {
             logTackStarted(track);
         } else {
@@ -60,6 +70,7 @@ public class TrackScheduler extends AudioEventAdapter {
     public void clear() {
         queue.clear();
         nextTrack();
+        checkDisconnect();
     }
 
     public int getQueueSize() {
@@ -77,15 +88,45 @@ public class TrackScheduler extends AudioEventAdapter {
         if (endReason.mayStartNext) {
             if (repeating) {
                 player.startTrack(track.makeClone(), false);
+                checkDisconnect();
                 return;
             }
             nextTrack();
+            checkDisconnect();
             return;
         }
 
         if (endReason == AudioTrackEndReason.LOAD_FAILED) {
             log.error("Error playing {} ({})", track.getInfo().title, track.getInfo().uri);
             nextTrack();
+            checkDisconnect();
+        }
+
+        checkDisconnect();
+    }
+
+    @Override
+    public void onTrackStart(AudioPlayer player, AudioTrack track) {
+        cancelDisconnectTimer();
+    }
+
+    private void checkDisconnect() {
+        if (queue.isEmpty() && player.getPlayingTrack() == null) {
+            scheduleDisconnect();
+        }
+    }
+
+    private void scheduleDisconnect() {
+        if (disconnectTask != null) {
+            disconnectTask.cancel(false);
+        }
+        disconnectTask = executor.schedule(() -> guild.getAudioManager().closeAudioConnection(), 3, TimeUnit.MINUTES);
+    }
+
+    private void cancelDisconnectTimer() {
+        if (disconnectTask != null) {
+            disconnectTask.cancel(false);
+            disconnectTask = null;
         }
     }
 

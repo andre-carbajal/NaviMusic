@@ -1,3 +1,3 @@
 # Release Notes
 
-- Fixed a bug with Spotify tokens that would expire when the bot was left on and inactive.
+- If there is no one using the bot, it will automatically disconnect after 3 minutes.
