@@ -1,4 +1,4 @@
-FROM maven:3.9.8-eclipse-temurin-21-alpine AS build
+FROM maven:3.9.12-eclipse-temurin-25-alpine AS build
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY src ./src
 
 RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
@@ -21,6 +21,6 @@ COPY --from=build /app/target/*.jar /app/NaviMusic.jar
 RUN chown -R appuser:appgroup /app
 USER appuser
 
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0"
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 --enable-native-access=ALL-UNNAMED"
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/NaviMusic.jar nogui $@", "--"]

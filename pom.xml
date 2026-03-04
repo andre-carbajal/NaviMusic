@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>4.0.3</version>
         <relativePath/>
     </parent>
     <groupId>net.andrecarbajal</groupId>
@@ -15,15 +15,11 @@
     <name>NaviMusic</name>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
-        <repository>
-            <id>jitpack</id>
-            <url>https://jitpack.io</url>
-        </repository>
         <repository>
             <id>arbjergDev-releases</id>
             <name>Lavalink Repository</name>
@@ -41,36 +37,30 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.6.1</version>
+            <version>6.3.1</version>
         </dependency>
         <!--Lavaplayer-->
         <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>2.2.4</version>
+            <version>2.2.6</version>
         </dependency>
         <!--YouTube-->
         <dependency>
             <groupId>dev.lavalink.youtube</groupId>
             <artifactId>v2</artifactId>
-            <version>1.13.5</version>
+            <version>1.18.0</version>
         </dependency>
         <!--Spotify-->
         <dependency>
             <groupId>se.michaelthelin.spotify</groupId>
             <artifactId>spotify-web-api-java</artifactId>
-            <version>9.3.0</version>
+            <version>9.4.0</version>
         </dependency>
 
-        <!--SpringFramework-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <!--Lombok-->
@@ -79,10 +69,56 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!--DAVE (Encryption) - JDAVE for Java 25-->
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-api</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- Native binaries for DAVE -->
+
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-win-x86-64</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-linux-x86-64</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-linux-aarch64</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>jdave-native-darwin</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

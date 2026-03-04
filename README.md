@@ -20,7 +20,7 @@ development and testing purposes.
 
 Before you begin, ensure you have the following installed on your machine:
 
-- Java 21
+- Java 25
 - Maven
 - Docker (optional)
 
@@ -28,6 +28,8 @@ Before you begin, ensure you have the following installed on your machine:
 
 Replace x.y with the version number of the last release.
 {nogui} is an optional argument to run the bot without the GUI.
+
+**Important for Java 25:** Due to the use of Discord's DAVE protocol (E2EE) through the JDave library, you **must** include the `--enable-native-access=ALL-UNNAMED` flag in your Java execution command to allow access to the native encryption libraries.
 
 First you need to get the YOUTUBE_PO_TOKEN, YOUTUBE_VISITOR. You can get them with [this generator](https://github.com/iv-org/youtube-trusted-session-generator)
 Then you need to get the YOUTUBE_OAUTH2_CODE. You can get it by running the bot and following the steps.
@@ -47,10 +49,12 @@ Finally execute the bot with all the environment variables(DISCORD_TOKEN, SPOTIF
 - Run the bot
 
 ```bash
-java -jar NaviMusic-x.y.jar {nogui}
+java --enable-native-access=ALL-UNNAMED -jar NaviMusic-x.y.jar {nogui}
 ```
 
 ## Running the Application with Docker
+
+The Docker image already includes the necessary flags for Java 25.
 
 - Pull the Docker image from Docker Hub:
 
@@ -58,10 +62,10 @@ java -jar NaviMusic-x.y.jar {nogui}
 docker pull anvian/navi-music
 ```
 
-- Run the Docker container, passing your Discord, Spotify Client ID, and Spotify Secret tokens as arguments:
+- Run the Docker container, passing your Discord, Spotify Client ID, and Spotify Secret tokens as environment variables:
 
 ```bash
-docker run anvian/navi-music -e DISCORD_TOKEN=your_discord_token SPOTIFY_CLIENT_ID=your_spotify_client_id SPOTIFY_CLIENT_SECRET=your_spotify_secret YOUTUBE_POTOKEN=your_youtube_potoken YOUTUBE_VISITOR=your_youtube_visitor YOUTUBE_OAUTH2=your_youtube_oauth2_code
+docker run -e DISCORD_TOKEN=your_discord_token -e SPOTIFY_CLIENT_ID=your_spotify_client_id -e SPOTIFY_CLIENT_SECRET=your_spotify_secret -e YOUTUBE_POTOKEN=your_youtube_potoken -e YOUTUBE_VISITOR=your_youtube_visitor -e YOUTUBE_OAUTH2=your_youtube_oauth2_code anvian/navi-music
 ```
 
 ## License

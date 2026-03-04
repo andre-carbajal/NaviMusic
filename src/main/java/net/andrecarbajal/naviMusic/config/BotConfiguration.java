@@ -1,14 +1,17 @@
 package net.andrecarbajal.naviMusic.config;
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.andrecarbajal.naviMusic.commands.SlashCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -19,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import java.util.HashSet;
 import java.util.List;
@@ -38,56 +43,75 @@ public class BotConfiguration extends ListenerAdapter {
 
     private JDA jda;
 
-    @Bean
-    public JDA jda() {
+    @EventListener(ContextRefreshedEvent.class)
+    public void onApplicationEvent() {
+        if (jda != null) return;
+
         log.info("Starting Bot");
 
-        if (token.equals("default"))
-            throw new IllegalArgumentException("Bot token not specified in environment / application.properties");
+        if (token == null || token.equals("default") || token.isEmpty()) {
+            log.error("Bot token not specified in environment / application.properties");
+            return;
+        }
 
-        if (!listeners.contains(this)) listeners.add(this);
-
-        JDA jda;
         try {
-
             jda = JDABuilder
                     .createDefault(token)
                     .setActivity(Activity.customStatus("Navi Music | /help"))
                     .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES)
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .setAudioModuleConfig(new AudioModuleConfig().withDaveSessionFactory(new JDaveSessionFactory()))
                     .build().awaitReady();
 
-            listeners.forEach(jda::addEventListener);
+            jda.addEventListener(this);
+            listeners.forEach(listener -> {
+                if (listener != this) {
+                    jda.addEventListener(listener);
+                }
+            });
+
+            registerCommands();
+            log.info("Bot started and commands registered");
         } catch (InterruptedException e) {
             log.error("Error starting JDA instance", e);
-            return null;
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            log.error("Unexpected error during JDA initialization", e);
         }
+    }
 
+    private void registerCommands() {
         Set<CommandData> commands = new HashSet<>();
         slashCommands.forEach(slashCommand -> {
             SlashCommandData data = Commands.slash(slashCommand.getName(), slashCommand.getDescription());
 
             if (slashCommand.getPermission() != null)
                 data.setDefaultPermissions(DefaultMemberPermissions.enabledFor(slashCommand.getPermission()));
-            data.setGuildOnly(true);
+            data.setContexts(InteractionContextType.GUILD);
             data.addOptions(slashCommand.getOptionDataList());
             commands.add(data);
         });
-        jda.updateCommands().addCommands(commands).complete();
+        jda.updateCommands().addCommands(commands).queue();
+    }
 
-        log.info("Bot started");
-        this.jda = jda;
+    @Bean
+    public JDA jdaInstance() {
         return jda;
     }
 
     @PreDestroy
     public void shutdown() {
         log.info("Shutting down");
-
-        try {
-            this.jda.awaitShutdown();
-        } catch (InterruptedException e) {
-            log.error("Error during bot shutdown", e);
+        if (jda != null) {
+            jda.shutdown();
+            try {
+                if (!jda.awaitShutdown(10, java.util.concurrent.TimeUnit.SECONDS)) {
+                    jda.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                log.error("Error during bot shutdown", e);
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
