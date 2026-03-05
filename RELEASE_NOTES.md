@@ -6,3 +6,5 @@
 - Add DAVE (JDave) dependencies for native encryption support in Java 25
 - Refactor AudioConfig to improve YouTube client handling and OAuth logic
 - Enhance BotConfiguration with better JDA initialization and command registration
+- Source code is changed from Java to Kotlin
+- Voice channel management and connection handling have been improved.

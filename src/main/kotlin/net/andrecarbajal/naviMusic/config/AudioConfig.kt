@@ -73,21 +73,14 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
     }
 
     override fun onGuildVoiceUpdate(e: GuildVoiceUpdateEvent) {
-        if (e.channelLeft == null) return
+        val selfMember = e.guild.selfMember
+        val voiceState = selfMember.voiceState ?: return
+        val connectedChannel = voiceState.channel ?: return
 
-        if (e.member == e.guild.selfMember) {
+        if (connectedChannel.members.size == 1) {
+            log.info("Bot is alone. Disconnecting and clearing queue.")
             musicService.getGuildMusicManager(e.guild).scheduler.clear()
-            return
-        }
-
-        val state = e.guild.selfMember.voiceState ?: return
-        val channel = state.channel ?: return
-
-        if (channel.id == e.channelLeft?.id) {
-            if (channel.members.size == 1) {
-                musicService.getGuildMusicManager(e.guild).scheduler.clear()
-                e.guild.audioManager.closeAudioConnection()
-            }
+            e.guild.audioManager.closeAudioConnection()
         }
     }
 }
