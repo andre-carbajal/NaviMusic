@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import org.springframework.stereotype.Component
 
 @Component
-class DieCommand : SlashCommand("die", "Rolls a die", Category.GENERAL) {
+class RollCommand : SlashCommand("roll", "Rolls a die", Category.GENERAL) {
     init {
         addOption(OptionData(OptionType.INTEGER, "sides", "Number of sides on the die", false))
     }
