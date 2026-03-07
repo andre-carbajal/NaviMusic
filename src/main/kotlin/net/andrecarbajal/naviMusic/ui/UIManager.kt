@@ -1,7 +1,9 @@
 package net.andrecarbajal.naviMusic.ui
 
+import org.springframework.stereotype.Component
 import java.awt.GraphicsEnvironment
 
+@Component
 class UIManager {
     fun checkGui(args: Array<String>) {
         var isGuiVisible = true

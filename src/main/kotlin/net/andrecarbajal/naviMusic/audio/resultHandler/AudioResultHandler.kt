@@ -19,7 +19,8 @@ class AudioResultHandler(
     private val musicService: MusicService,
     private val guild: Guild,
     private val member: Member,
-    private val event: SlashCommandInteractionEvent? = null
+    private val event: SlashCommandInteractionEvent? = null,
+    private val originalUrl: String? = null
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(AudioResultHandler::class.java)
@@ -32,7 +33,7 @@ class AudioResultHandler(
 
         val richResponse = RichResponse(
             title = "Song added to queue",
-            text = "[${trackInfo.title.trim()}](${trackInfo.uri}) de `${trackInfo.author}`",
+            text = "[${trackInfo.title.trim()}](${originalUrl ?: trackInfo.uri}) by `${trackInfo.author}`",
             fields = listOf(
                 MessageEmbed.Field("Duration", VideoInfo(trackInfo).durationToReadable(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
@@ -64,16 +65,26 @@ class AudioResultHandler(
         val playlistSize = playlist.tracks.size
         val size = musicService.getGuildMusicManager(guild).scheduler.getQueueSize() + playlistSize
 
+        val playlistUrl = if (originalUrl != null && URLUtils.isURL(originalUrl)) {
+            originalUrl
+        } else {
+            firstTrack.info.uri.let { uri ->
+                val listId = URLUtils.getURLParam(uri, "list").orElse(null)
+                if (listId != null) "https://www.youtube.com/playlist?list=$listId" else uri
+            }
+        }
+
         val richResponse = RichResponse(
-            title = "Playlist added to queue", text = "[${playlist.name}](${
-                firstTrack.info.uri.split("&list=")
-                    .let { if (it.size > 1) "${it[0]}&list=${it[1].split("&")[0]}" else firstTrack.info.uri }
-            })", fields = listOf(
+            title = "Playlist added to queue",
+            text = "[${playlist.name}]($playlistUrl)",
+            fields = listOf(
                 MessageEmbed.Field("Songs added", playlistSize.toString(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
-            ), footer = RichResponse.Footer(
+            ),
+            footer = RichResponse.Footer(
                 text = "Added by ${member.effectiveName}", imageUrl = member.effectiveAvatarUrl
-            ))
+            )
+        )
 
         if (firstTrack.sourceManager is YoutubeAudioSourceManager) {
             URLUtils.getURLParam(firstTrack.info.uri, "v").ifPresent { s ->

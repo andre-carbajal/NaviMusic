@@ -4,16 +4,21 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.andrecarbajal.naviMusic.audio.resultHandler.AudioResultHandler
 import net.andrecarbajal.naviMusic.audio.resultHandler.SpotifyPlaylistResultHandler
 import net.andrecarbajal.naviMusic.audio.resultHandler.SpotifyTrackResultHandler
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifyFetch
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifyPlaylist
+import net.andrecarbajal.naviMusic.audio.spotify.SpotifyResource
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifySong
 import net.andrecarbajal.naviMusic.dto.response.RichResponse
+import net.andrecarbajal.naviMusic.ui.MusicPresenter
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.managers.AudioManager
@@ -21,13 +26,17 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutionException
 
 @Service
-class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, private val spotifyFetch: SpotifyFetch) {
+class MusicService(
+    @Lazy private val audioPlayerManager: AudioPlayerManager,
+    private val spotifyFetch: SpotifyFetch,
+    private val presenter: MusicPresenter
+) {
 
     private val log = LoggerFactory.getLogger(MusicService::class.java)
     private val managers = mutableMapOf<Long, GuildMusicManager>()
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     fun getGuildMusicManager(guild: Guild): GuildMusicManager {
         val musicManager = managers.getOrPut(guild.idLong) {
@@ -37,7 +46,6 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         return musicManager
     }
 
-    @Throws(ExecutionException::class, InterruptedException::class)
     fun loadAndPlay(
         channel: TextChannel,
         provider: String,
@@ -45,19 +53,18 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         member: Member?,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
-        loadItem(channel.guild, member, "$provider: $track", AudioResultHandler(this, channel.guild, member!!, event))
-        return RichResponse("Loading track...", RichResponse.Type.OK, false)
+        val query = "$provider: $track"
+        loadItem(channel.guild, member, query, AudioResultHandler(this, channel.guild, member!!, event, null))
+        return presenter.formatSimpleResponse("Loading...", "Adding track to queue")
     }
 
-    @Throws(ExecutionException::class, InterruptedException::class)
     fun loadAndPlayUrl(
         channel: TextChannel, trackUrl: String, member: Member?, event: SlashCommandInteractionEvent? = null
     ): RichResponse {
-        loadItem(channel.guild, member, trackUrl, AudioResultHandler(this, channel.guild, member!!, event))
-        return RichResponse("Loading track from URL...", RichResponse.Type.OK, false)
+        loadItem(channel.guild, member, trackUrl, AudioResultHandler(this, channel.guild, member!!, event, trackUrl))
+        return presenter.formatSimpleResponse("Loading URL...", "Fetching data from provided link")
     }
 
-    @Throws(ExecutionException::class, InterruptedException::class)
     fun loadAndPlaySpotifyUrl(
         channel: TextChannel,
         provider: String,
@@ -65,133 +72,128 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         member: Member?,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
-        // Iniciamos la conexión en paralelo
-        val connectionFuture = connectToChannel(channel.guild.audioManager, member, true)
+        val connectionFuture = connectToChannel(channel.guild.audioManager, member)
 
-        // Iniciamos el fetch de Spotify en un hilo virtual para no bloquear
-        Thread.ofVirtual().start {
+        serviceScope.launch {
             try {
-                val isTrack = trackUrl.contains("track", ignoreCase = true)
-                val isPlaylist = trackUrl.contains("playlist", ignoreCase = true)
-                val isAlbum = trackUrl.contains("album", ignoreCase = true)
+                when (val resource = SpotifyResource.fromUrl(trackUrl)) {
+                    is SpotifyResource.Track -> handleSpotifyTrack(
+                        resource,
+                        provider,
+                        channel,
+                        member,
+                        event,
+                        connectionFuture
+                    )
 
-                if (isTrack) {
-                    val song = spotifyFetch.fetchSong(trackUrl) ?: return@start
-                    connectionFuture.thenAccept { connected ->
-                        if (connected) {
-                            val spotifyTrackResultHandler =
-                                SpotifyTrackResultHandler(this, channel.guild, member, song, event)
-                            audioPlayerManager.loadItemOrdered(
-                                getGuildMusicManager(channel.guild), "$provider: $song", spotifyTrackResultHandler
-                            )
-                        }
-                    }
-                } else if (isPlaylist || isAlbum) {
-                    val playlist =
-                        if (isPlaylist) spotifyFetch.fetchPlaylist(trackUrl) else spotifyFetch.fetchAlbum(trackUrl)
-                    if (playlist != null) {
-                        connectionFuture.thenAccept { connected ->
-                            if (connected) {
-                                loadSpotifySongs(playlist, channel, member, provider)
-                                event?.let {
-                                    spotifyResponse(
-                                        channel.guild,
-                                        member,
-                                        playlist,
-                                        if (isPlaylist) "playlist" else "album",
-                                        trackUrl
-                                    ).editReply(it)
-                                }
-                            }
-                        }
-                    }
+                    is SpotifyResource.Playlist, is SpotifyResource.Album -> handleSpotifyCollection(
+                        resource,
+                        provider,
+                        channel,
+                        member,
+                        event,
+                        connectionFuture,
+                        trackUrl
+                    )
+
+                    is SpotifyResource.Invalid -> log.warn("Invalid Spotify URL: {}", trackUrl)
                 }
             } catch (e: Exception) {
                 log.error("Error processing Spotify URL", e)
             }
         }
 
-        return RichResponse("Processing Spotify link...", RichResponse.Type.OK, false)
+        return presenter.formatSimpleResponse("Spotify Processing", "Analyzing Spotify link...")
+    }
+
+    private fun handleSpotifyTrack(
+        resource: SpotifyResource.Track, provider: String, channel: TextChannel, member: Member?,
+        event: SlashCommandInteractionEvent?, connectionFuture: CompletableFuture<Boolean>
+    ) {
+        val song = spotifyFetch.fetchSong(resource.id) ?: return
+        connectionFuture.thenAccept { connected ->
+            if (connected) {
+                val handler = SpotifyTrackResultHandler(this, channel.guild, member, song, event)
+                audioPlayerManager.loadItemOrdered(getGuildMusicManager(channel.guild), "$provider: $song", handler)
+            }
+        }
+    }
+
+    private fun handleSpotifyCollection(
+        resource: SpotifyResource, provider: String, channel: TextChannel, member: Member?,
+        event: SlashCommandInteractionEvent?, connectionFuture: CompletableFuture<Boolean>, trackUrl: String
+    ) {
+        val playlist =
+            if (resource is SpotifyResource.Playlist) spotifyFetch.fetchPlaylist(resource.id) else spotifyFetch.fetchAlbum(
+                (resource as SpotifyResource.Album).id
+            )
+
+        if (playlist != null) {
+            connectionFuture.thenAccept { connected ->
+                if (connected) {
+                    loadSpotifySongs(playlist, channel, member, provider)
+                    event?.let {
+                        val type = if (resource is SpotifyResource.Playlist) "playlist" else "album"
+                        val queueSize = getGuildMusicManager(channel.guild).scheduler.getQueueSize()
+                        presenter.formatSpotifyResponse(member, playlist, type, trackUrl, queueSize).editReply(it)
+                    }
+                }
+            }
+        }
     }
 
     private fun loadItem(guild: Guild, member: Member?, identifier: String, handler: AudioLoadResultHandler) {
         val musicManager = getGuildMusicManager(guild)
-        connectToChannel(guild.audioManager, member, true).thenAccept { connected ->
+        connectToChannel(guild.audioManager, member).thenAccept { connected ->
             if (connected) {
                 audioPlayerManager.loadItemOrdered(musicManager, identifier, handler)
             }
         }
     }
 
-    private fun spotifyResponse(
-        guild: Guild, member: Member?, playlist: SpotifyPlaylist, type: String, url: String = ""
-    ): RichResponse {
-        val playlistSize = playlist.songs.size
-        val sizeInQueue = getGuildMusicManager(guild).scheduler.getQueueSize() + playlistSize
-
-        val response = RichResponse(
-            title = "Adding Spotify $type to queue", text = "[${playlist.title}]($url)", fields = listOf(
-                MessageEmbed.Field("Songs", "$playlistSize songs", true),
-                MessageEmbed.Field("In queue", if (sizeInQueue == 1) "1 song" else "$sizeInQueue songs", true)
-            ), footer = member?.let {
-                RichResponse.Footer(text = "Added by ${it.effectiveName}", imageUrl = it.effectiveAvatarUrl)
-            })
-        return response
-    }
-
     private fun loadSpotifySongs(playlist: SpotifyPlaylist, channel: TextChannel, member: Member?, provider: String) {
         playlist.songs.forEach { song: SpotifySong ->
-            log.warn("Loading song: {}", song.toString())
             val musicManager = getGuildMusicManager(channel.guild)
-            val spotifyPlaylistResultHandler = SpotifyPlaylistResultHandler(this, channel.guild, member)
-            audioPlayerManager.loadItemOrdered(musicManager, "$provider: $song", spotifyPlaylistResultHandler)
+            val handler = SpotifyPlaylistResultHandler(this, channel.guild, member)
+            audioPlayerManager.loadItemOrdered(musicManager, "$provider: $song", handler)
         }
     }
 
     fun skipTrack(channel: TextChannel, position: Int): RichResponse {
         val musicManager = getGuildMusicManager(channel.guild)
-        if (position < 1) return RichResponse("Invalid position", RichResponse.Type.USER_ERROR, false)
+        if (position < 1) return presenter.formatSimpleResponse(
+            "Error",
+            "Invalid position",
+            RichResponse.Type.USER_ERROR
+        )
 
         val queue = musicManager.scheduler.queue.toList()
         if (position > 1 && (position - 2) >= queue.size) {
-            return RichResponse("Position $position doesn't exist in queue", RichResponse.Type.USER_ERROR, false)
+            return presenter.formatSimpleResponse(
+                "Error",
+                "Position $position doesn't exist",
+                RichResponse.Type.USER_ERROR
+            )
         }
 
-        val trackToSkip = if (position == 1) {
-            musicManager.player.playingTrack
-        } else {
-            queue[position - 2]
-        }
+        val trackToSkip = if (position == 1) musicManager.player.playingTrack else queue[position - 2]
+        if (trackToSkip == null) return presenter.formatSimpleResponse(
+            "Error",
+            "Nothing to skip",
+            RichResponse.Type.USER_ERROR
+        )
 
-        if (trackToSkip == null) {
-            return RichResponse("Nothing to skip", RichResponse.Type.USER_ERROR, false)
-        }
+        if (position == 1) musicManager.scheduler.nextTrack() else musicManager.scheduler.skipTrack(position - 1)
 
-        if (position == 1) {
-            musicManager.scheduler.nextTrack()
-        } else {
-            musicManager.scheduler.skipTrack(position - 1)
-        }
-
-        return RichResponse(
-            title = if (position == 1) "Skipping current track" else "Removing track from queue",
-            text = "[${trackToSkip.info.title}](${trackToSkip.info.uri})",
-            thumbnail = if (trackToSkip.info.uri.contains("youtube.com")) {
-                "https://img.youtube.com/vi/${
-                    net.andrecarbajal.naviMusic.util.URLUtils.getURLParam(
-                        trackToSkip.info.uri, "v"
-                    ).orElse("")
-                }/maxresdefault.jpg"
-            } else null
+        return presenter.formatSimpleResponse(
+            "Skipping...",
+            "Removed: [${trackToSkip.info.title}](${trackToSkip.info.uri})"
         )
     }
 
     fun clear(guild: Guild): RichResponse {
-        val musicManager = getGuildMusicManager(guild)
-        musicManager.scheduler.clear()
-        return RichResponse(
-            title = "Queue cleaned", text = "All songs have been removed and playback stopped."
-        )
+        getGuildMusicManager(guild).scheduler.clear()
+        return presenter.formatSimpleResponse("Queue cleaned", "All songs removed.")
     }
 
     fun play(musicManager: GuildMusicManager, track: AudioTrack, member: Member?) {
@@ -206,113 +208,68 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         }
     }
 
-    fun connectToChannel(audioManager: AudioManager, member: Member?, isInitial: Boolean): CompletableFuture<Boolean> {
+    fun connectToChannel(audioManager: AudioManager, member: Member?): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
-
         if (audioManager.isConnected) {
             future.complete(true)
             return future
         }
-
-        if (!isInitial) {
+        val voiceChannel = member?.voiceState?.channel ?: run {
             future.complete(false)
             return future
         }
 
-        val voiceChannel = member?.voiceState?.channel
-        if (voiceChannel == null) {
-            future.complete(false)
-            return future
-        }
-
-        return try {
-            log.info("Connecting to channel: {}", voiceChannel.name)
+        try {
             audioManager.openAudioConnection(voiceChannel)
-
-            Thread.ofVirtual().start {
-                try {
-                    var retries = 0
-                    while (!audioManager.isConnected && retries < 100) {
-                        Thread.sleep(100)
-                        retries++
-                    }
-
-                    if (audioManager.isConnected) {
-                        log.info("Connected successfully, waiting for DAVE session...")
-                        Thread.sleep(2000)
-                        future.complete(true)
-                    } else {
-                        log.warn("Connection timeout")
-                        future.complete(false)
-                    }
-                } catch (e: Exception) {
-                    log.error("Error waiting for connection", e)
+            serviceScope.launch {
+                var retries = 0
+                while (!audioManager.isConnected && retries < 100) {
+                    delay(100)
+                    retries++
+                }
+                if (audioManager.isConnected) {
+                    delay(2000)
+                    future.complete(true)
+                } else {
                     future.complete(false)
                 }
             }
-            future
         } catch (ex: Exception) {
             log.error("Error joining voice channel", ex)
             future.complete(false)
-            future
         }
+        return future
     }
 
     fun nowPlaying(textChannel: TextChannel): RichResponse {
         val musicManager = getGuildMusicManager(textChannel.guild)
-        val track =
-            musicManager.player.playingTrack ?: return RichResponse("No track playing", RichResponse.Type.ERROR, false)
-
-        val trackInfo = track.info
-        val richResponse = RichResponse(
-            title = "Now playing",
-            text = "[${trackInfo.title.trim()}](${trackInfo.uri}) de `${trackInfo.author}`",
-            fields = listOf(
-                MessageEmbed.Field(
-                    "Duration", net.andrecarbajal.naviMusic.dto.VideoInfo(trackInfo).durationToReadable(), true
-                ), MessageEmbed.Field(
-                    "Position", "${net.andrecarbajal.naviMusic.dto.VideoInfo.formatTime(track.position)} / ${
-                        net.andrecarbajal.naviMusic.dto.VideoInfo.formatTime(track.duration)
-                    }", true
-                )
-            )
+        val track = musicManager.player.playingTrack ?: return presenter.formatSimpleResponse(
+            "No music",
+            "The queue is empty.",
+            RichResponse.Type.ERROR
         )
-
-        if (trackInfo.uri.contains("youtube.com")) {
-            net.andrecarbajal.naviMusic.util.URLUtils.getURLParam(trackInfo.uri, "v").ifPresent { s ->
-                richResponse.thumbnail = "https://img.youtube.com/vi/$s/maxresdefault.jpg"
-            }
-        }
-
-        val member = track.getUserData(Member::class.java)
-        if (member != null) {
-            richResponse.footer = RichResponse.Footer(
-                text = "Requested by ${member.effectiveName}", imageUrl = member.effectiveAvatarUrl
-            )
-        }
-
-        return richResponse
+        return presenter.formatNowPlaying(track)
     }
 
     fun pause(textChannel: TextChannel): RichResponse {
-        val musicManager = getGuildMusicManager(textChannel.guild)
-        val player = musicManager.player
-        if (player.isPaused) return RichResponse("Already paused", RichResponse.Type.USER_ERROR, false)
-
-        player.isPaused = true
-        return RichResponse(
-            title = "Playback Paused", text = "The current track has been paused. Use `/resume` to continue."
+        val player = getGuildMusicManager(textChannel.guild).player
+        if (player.isPaused) return presenter.formatSimpleResponse(
+            "Error",
+            "Already paused",
+            RichResponse.Type.USER_ERROR
         )
+        player.isPaused = true
+        return presenter.formatSimpleResponse("Paused", "Use /resume to continue")
     }
 
     fun resume(textChannel: TextChannel): RichResponse {
-        val musicManager = getGuildMusicManager(textChannel.guild)
-        val player = musicManager.player
-        if (!player.isPaused) return RichResponse("Already playing", RichResponse.Type.USER_ERROR, false)
-
-        player.isPaused = false
-        return RichResponse(
-            title = "Playback Resumed", text = "Resuming playback of the current track."
+        val player = getGuildMusicManager(textChannel.guild).player
+        if (!player.isPaused) return presenter.formatSimpleResponse(
+            "Error",
+            "Already playing",
+            RichResponse.Type.USER_ERROR
         )
+        player.isPaused = false
+        return presenter.formatSimpleResponse("Resumed", "Playback resumed")
     }
 }
