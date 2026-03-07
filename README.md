@@ -10,6 +10,7 @@ Welcome to NaviMusic, a highly user-friendly music bot for Discord. Now rebuilt 
 - [Available Commands](#available-commands)
 - [Running the Application](#running-the-application)
 - [Running the Application with Docker](#running-the-application-with-docker)
+- [Production Mode](#production-mode)
 - [License](#license)
 
 ## Getting Started
@@ -72,7 +73,7 @@ NaviMusic uses Slash Commands for easy interaction.
    ```
 2. Run the JAR:
    ```bash
-   java --enable-native-access=ALL-UNNAMED -jar target/NaviMusic-4.0.0.jar {nogui}
+   java --enable-native-access=ALL-UNNAMED -jar target/NaviMusic-x.x.x.jar {nogui}
    ```
    *`{nogui}` is an optional argument to disable the console GUI.*
 
@@ -80,14 +81,26 @@ NaviMusic uses Slash Commands for easy interaction.
 
 The Docker image includes the necessary Java 25 flags and environment variable support.
 
+### Local Development (with logs)
 ```bash
-docker run -e DISCORD_TOKEN=your_token \
-           -e SPOTIFY_CLIENT_ID=your_id \
-           -e SPOTIFY_CLIENT_SECRET=your_secret \
-           -e YOUTUBE_POTOKEN=your_potoken \
-           -e YOUTUBE_VISITOR=your_visitor \
-           -e YOUTUBE_OAUTH2=your_oauth2 \
-           anvian/navi-music
+docker build -t navimusic-bot .
+docker run --env-file .env navimusic-bot
+```
+
+## Production Mode
+
+For production environments, NaviMusic includes a `prod` profile that silences verbose "Song Added" logs, showing only Warnings and Errors to keep the console clean.
+
+### Running in Production (Docker)
+The `Dockerfile` automatically activates the `prod` profile. To run it:
+```bash
+docker run -d --restart always --env-file .env --name navimusic anvian/navi-music
+```
+
+### Running in Production (Manual)
+If running the JAR manually, add the profile flag:
+```bash
+java --enable-native-access=ALL-UNNAMED -jar target/NaviMusic-x.x.x.jar nogui --spring.profiles.active=prod
 ```
 
 ## License

@@ -23,4 +23,4 @@ USER appuser
 
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 --enable-native-access=ALL-UNNAMED"
 
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/NaviMusic.jar nogui $@", "--"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/NaviMusic.jar nogui --spring.profiles.active=prod $@", "--"]

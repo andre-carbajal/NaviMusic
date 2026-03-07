@@ -1,5 +1,6 @@
 # Release Notes
 
+- **Production-Optimized Logging:** Added a specialized `prod` Spring profile and updated the `Dockerfile` to suppress verbose song-loading logs in containerized environments, focusing on warnings and errors for cleaner production output.
 - **Automated Command Registration:** Introduced a new `CommandManager` that automatically detects and registers all slash commands marked as Spring `@Component`, eliminating manual registration and reducing boilerplate code.
 - **Architecture Decoupling (Presenter Pattern):** Extracted UI response logic into a dedicated `MusicPresenter` component, ensuring `MusicService` remains focused on core audio logic while the presenter handles the visual formatting of `RichResponse` embeds.
 - **Enhanced Spotify & YouTube Link Handling:** Implemented a robust `SpotifyResource` parser for safer URL handling and fixed a logic error in `AudioResultHandler` to ensure YouTube playlist links in Discord responses correctly point to the full playlist rather than individual tracks.
