@@ -15,10 +15,12 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.managers.AudioManager
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 
 @Service
@@ -36,62 +38,74 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
     }
 
     @Throws(ExecutionException::class, InterruptedException::class)
-    fun loadAndPlay(channel: TextChannel, provider: String, track: String, member: Member?): Response {
+    fun loadAndPlay(
+        channel: TextChannel,
+        provider: String,
+        track: String,
+        member: Member?,
+        event: SlashCommandInteractionEvent? = null
+    ): Response {
         val musicManager = getGuildMusicManager(channel.guild)
-        if (!connectToChannel(channel.guild.audioManager, member, true)) {
-            return Response("You must be in a voice channel", Response.Type.USER_ERROR, false)
+        val audioResult = AudioResultHandler(this, channel.guild, member!!, event)
+
+        connectToChannel(channel.guild.audioManager, member, true).thenAccept { connected ->
+            if (connected) {
+                audioPlayerManager.loadItemOrdered(musicManager, "$provider: $track", audioResult)
+            }
         }
-        val audioResult = AudioResultHandler(this, channel.guild, member!!)
-        audioPlayerManager.loadItemOrdered(musicManager, "$provider: $track", audioResult).get()
-        return audioResult.response ?: Response("No response", Response.Type.ERROR, false)
+
+        return Response("Loading track...", Response.Type.OK, false)
     }
 
     @Throws(ExecutionException::class, InterruptedException::class)
-    fun loadAndPlayUrl(channel: TextChannel, trackUrl: String, member: Member?): Response {
+    fun loadAndPlayUrl(
+        channel: TextChannel, trackUrl: String, member: Member?, event: SlashCommandInteractionEvent? = null
+    ): Response {
         val musicManager = getGuildMusicManager(channel.guild)
-        if (!connectToChannel(channel.guild.audioManager, member, true)) {
-            return Response("You must be in a voice channel", Response.Type.USER_ERROR, false)
+        val audioResult = AudioResultHandler(this, channel.guild, member!!, event)
+
+        connectToChannel(channel.guild.audioManager, member, true).thenAccept { connected ->
+            if (connected) {
+                audioPlayerManager.loadItemOrdered(musicManager, trackUrl, audioResult)
+            }
         }
-        val audioResult = AudioResultHandler(this, channel.guild, member!!)
-        audioPlayerManager.loadItemOrdered(musicManager, trackUrl, audioResult).get()
-        return audioResult.response ?: Response("No response", Response.Type.ERROR, false)
+
+        return Response("Loading track from URL...", Response.Type.OK, false)
     }
 
     @Throws(ExecutionException::class, InterruptedException::class)
-    fun loadAndPlaySpotifyUrl(channel: TextChannel, provider: String, trackUrl: String, member: Member?): Response {
+    fun loadAndPlaySpotifyUrl(
+        channel: TextChannel,
+        provider: String,
+        trackUrl: String,
+        member: Member?,
+        event: SlashCommandInteractionEvent? = null
+    ): Response {
         val musicManager = getGuildMusicManager(channel.guild)
-        if (!connectToChannel(channel.guild.audioManager, member, true)) {
-            return Response("You must be in a voice channel", Response.Type.USER_ERROR, false)
+
+        connectToChannel(channel.guild.audioManager, member, true).thenAccept { connected ->
+            if (connected) {
+                if (trackUrl.contains("track", ignoreCase = true)) {
+                    val song = spotifyFetch.fetchSong(trackUrl) ?: return@thenAccept
+                    val spotifyTrackResultHandler = SpotifyTrackResultHandler(this, channel.guild, member, song, event)
+                    audioPlayerManager.loadItemOrdered(musicManager, "$provider: $song", spotifyTrackResultHandler)
+                }
+
+                if (trackUrl.contains("playlist", ignoreCase = true)) {
+                    val playlist = spotifyFetch.fetchPlaylist(trackUrl) ?: return@thenAccept
+                    loadSpotifySongs(playlist, channel, member, provider)
+                    event?.let { spotifyResponse(channel.guild, member, playlist, "playlist").editReply(it) }
+                }
+
+                if (trackUrl.contains("album", ignoreCase = true)) {
+                    val playlist = spotifyFetch.fetchAlbum(trackUrl) ?: return@thenAccept
+                    loadSpotifySongs(playlist, channel, member, provider)
+                    event?.let { spotifyResponse(channel.guild, member, playlist, "album").editReply(it) }
+                }
+            }
         }
 
-        if (trackUrl.contains("track", ignoreCase = true)) {
-            val song = spotifyFetch.fetchSong(trackUrl) ?: return Response(
-                "Error fetching spotify song",
-                Response.Type.ERROR,
-                false
-            )
-            val spotifyTrackResultHandler = SpotifyTrackResultHandler(this, channel.guild, member, song)
-            audioPlayerManager.loadItemOrdered(musicManager, "$provider: $song", spotifyTrackResultHandler).get()
-            return spotifyTrackResultHandler.response ?: Response("No response", Response.Type.ERROR, false)
-        }
-
-        if (trackUrl.contains("playlist", ignoreCase = true)) {
-            val playlist = spotifyFetch.fetchPlaylist(trackUrl) ?: return Response(
-                "Playlist not found",
-                Response.Type.ERROR,
-                false
-            )
-            loadSpotifySongs(playlist, channel, member, provider)
-            return spotifyResponse(channel.guild, member, playlist, "playlist")
-        }
-
-        if (trackUrl.contains("album", ignoreCase = true)) {
-            val playlist =
-                spotifyFetch.fetchAlbum(trackUrl) ?: return Response("Album not found", Response.Type.ERROR, false)
-            loadSpotifySongs(playlist, channel, member, provider)
-            return spotifyResponse(channel.guild, member, playlist, "album")
-        }
-        return Response("Couldn't find spotify link", Response.Type.ERROR, false)
+        return Response("Loading Spotify content...", Response.Type.OK, false)
     }
 
     private fun spotifyResponse(guild: Guild, member: Member?, playlist: SpotifyPlaylist, type: String): Response {
@@ -99,16 +113,12 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         val sizeInQueue = getGuildMusicManager(guild).scheduler.getQueueSize() + playlistSize
 
         return RichResponse(
-            title = "Adding Spotify $type to queue",
-            text = playlist.title,
-            fields = listOf(
+            title = "Adding Spotify $type to queue", text = playlist.title, fields = listOf(
                 MessageEmbed.Field("Songs", "$playlistSize songs", true),
                 MessageEmbed.Field("In queue", if (sizeInQueue == 1) "1 song" else "$sizeInQueue songs", true)
-            ),
-            footer = member?.let {
+            ), footer = member?.let {
                 RichResponse.Footer(text = "Added by ${it.effectiveName}", imageUrl = it.effectiveAvatarUrl)
-            }
-        )
+            })
     }
 
     private fun loadSpotifySongs(playlist: SpotifyPlaylist, channel: TextChannel, member: Member?, provider: String) {
@@ -139,43 +149,67 @@ class MusicService(@Lazy private val audioPlayerManager: AudioPlayerManager, pri
         return Response("Cleaning...", Response.Type.OK, false)
     }
 
-    fun play(guild: Guild, musicManager: GuildMusicManager, track: AudioTrack, member: Member?) {
-        if (connectToChannel(guild.audioManager, member, false)) {
+    fun play(musicManager: GuildMusicManager, track: AudioTrack, member: Member?) {
+        track.userData = member
+        musicManager.scheduler.queue(track)
+    }
+
+    fun playPlaylist(musicManager: GuildMusicManager, playlist: AudioPlaylist, member: Member?) {
+        playlist.tracks.forEach { track ->
             track.userData = member
             musicManager.scheduler.queue(track)
         }
     }
 
-    fun playPlaylist(guild: Guild, musicManager: GuildMusicManager, playlist: AudioPlaylist, member: Member?) {
-        if (connectToChannel(guild.audioManager, member, false)) {
-            playlist.tracks.forEach { track ->
-                track.userData = member
-                musicManager.scheduler.queue(track)
-            }
-        }
-    }
+    fun connectToChannel(audioManager: AudioManager, member: Member?, isInitial: Boolean): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
 
-    fun connectToChannel(audioManager: AudioManager, member: Member?, isInitial: Boolean): Boolean {
         if (audioManager.isConnected) {
-            val connectedChannel = audioManager.connectedChannel
-            return connectedChannel != null && connectedChannel.members.size > 1
+            future.complete(true)
+            return future
         }
 
-        if (!isInitial) return false
+        if (!isInitial) {
+            future.complete(false)
+            return future
+        }
 
-        if (member == null) return false
-        val voiceChannel = audioManager.guild.voiceChannels.find { it.members.contains(member) }
+        val voiceChannel = member?.voiceState?.channel
+        if (voiceChannel == null) {
+            future.complete(false)
+            return future
+        }
 
-        return if (voiceChannel != null) {
-            try {
-                audioManager.openAudioConnection(voiceChannel)
-                true
-            } catch (ex: Exception) {
-                log.error("Error joining voice channel", ex)
-                false
+        return try {
+            log.info("Connecting to channel: {}", voiceChannel.name)
+            audioManager.openAudioConnection(voiceChannel)
+
+            Thread.ofVirtual().start {
+                try {
+                    var retries = 0
+                    while (!audioManager.isConnected && retries < 100) {
+                        Thread.sleep(100)
+                        retries++
+                    }
+
+                    if (audioManager.isConnected) {
+                        log.info("Connected successfully, waiting for DAVE session...")
+                        Thread.sleep(2000)
+                        future.complete(true)
+                    } else {
+                        log.warn("Connection timeout")
+                        future.complete(false)
+                    }
+                } catch (e: Exception) {
+                    log.error("Error waiting for connection", e)
+                    future.complete(false)
+                }
             }
-        } else {
-            false
+            future
+        } catch (ex: Exception) {
+            log.error("Error joining voice channel", ex)
+            future.complete(false)
+            future
         }
     }
 

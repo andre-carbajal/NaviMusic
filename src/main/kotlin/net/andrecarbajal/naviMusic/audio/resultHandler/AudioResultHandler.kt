@@ -13,12 +13,14 @@ import net.andrecarbajal.naviMusic.util.URLUtils
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.slf4j.LoggerFactory
 
 class AudioResultHandler(
     private val musicService: MusicService,
     private val guild: Guild,
-    private val member: Member
+    private val member: Member,
+    private val event: SlashCommandInteractionEvent? = null
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(AudioResultHandler::class.java)
@@ -37,8 +39,7 @@ class AudioResultHandler(
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
             ),
             footer = RichResponse.Footer(
-                text = "Added by ${member.effectiveName}",
-                imageUrl = member.effectiveAvatarUrl
+                text = "Added by ${member.effectiveName}", imageUrl = member.effectiveAvatarUrl
             )
         )
 
@@ -49,11 +50,12 @@ class AudioResultHandler(
         }
 
         response = richResponse
-        musicService.play(guild, musicService.getGuildMusicManager(guild), track, member)
+        event?.let { richResponse.editReply(it) }
+        musicService.play(musicService.getGuildMusicManager(guild), track, member)
     }
 
     override fun playlistLoaded(playlist: AudioPlaylist) {
-        var firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull() ?: return
+        val firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull() ?: return
 
         if (playlist.isSearchResult) {
             trackLoaded(firstTrack)
@@ -64,15 +66,11 @@ class AudioResultHandler(
         val size = musicService.getGuildMusicManager(guild).scheduler.getQueueSize() + playlistSize
 
         val richResponse = RichResponse(
-            title = "Playlist added to queue",
-            text = playlist.name,
-            fields = listOf(
+            title = "Playlist added to queue", text = playlist.name, fields = listOf(
                 MessageEmbed.Field("Songs added", playlistSize.toString(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
-            ),
-            footer = RichResponse.Footer(
-                text = "Added by ${member.effectiveName}",
-                imageUrl = member.effectiveAvatarUrl
+            ), footer = RichResponse.Footer(
+                text = "Added by ${member.effectiveName}", imageUrl = member.effectiveAvatarUrl
             )
         )
 
@@ -83,21 +81,24 @@ class AudioResultHandler(
         }
 
         response = richResponse
-        musicService.playPlaylist(guild, musicService.getGuildMusicManager(guild), playlist, member)
+        event?.let { richResponse.editReply(it) }
+        musicService.playPlaylist(musicService.getGuildMusicManager(guild), playlist, member)
     }
 
     override fun noMatches() {
-        response = RichResponse(
-            type = Response.Type.USER_ERROR,
-            text = "Nothing found"
+        val richResponse = RichResponse(
+            type = Response.Type.USER_ERROR, text = "Nothing found"
         )
+        response = richResponse
+        event?.let { richResponse.editReply(it) }
     }
 
     override fun loadFailed(exception: FriendlyException) {
         log.error("Error loading track", exception)
-        response = RichResponse(
-            type = Response.Type.ERROR,
-            text = "Internal error"
+        val richResponse = RichResponse(
+            type = Response.Type.ERROR, text = "Internal error"
         )
+        response = richResponse
+        event?.let { richResponse.editReply(it) }
     }
 }

@@ -31,12 +31,12 @@ class PlayCommand(private val musicService: MusicService) :
 
             if (URLUtils.isURL(query)) {
                 if (query.contains("spotify", ignoreCase = true)) {
-                    musicService.loadAndPlaySpotifyUrl(textChannel, provider, query, member).editReply(event)
+                    musicService.loadAndPlaySpotifyUrl(textChannel, provider, query, member, event).editReply(event)
                 } else {
-                    musicService.loadAndPlayUrl(textChannel, query, member).editReply(event)
+                    musicService.loadAndPlayUrl(textChannel, query, member, event).editReply(event)
                 }
             } else {
-                musicService.loadAndPlay(textChannel, provider, query, member).editReply(event)
+                musicService.loadAndPlay(textChannel, provider, query, member, event).editReply(event)
             }
         } catch (e: Exception) {
             log.error("Error in PlayCommand", e)
