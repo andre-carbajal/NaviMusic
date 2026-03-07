@@ -7,7 +7,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import net.andrecarbajal.naviMusic.audio.MusicService
 import net.andrecarbajal.naviMusic.dto.VideoInfo
-import net.andrecarbajal.naviMusic.dto.response.Response
 import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.andrecarbajal.naviMusic.util.URLUtils
 import net.dv8tion.jda.api.entities.Guild
@@ -24,7 +23,7 @@ class AudioResultHandler(
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(AudioResultHandler::class.java)
-    var response: Response? = null
+    var response: RichResponse? = null
         private set
 
     override fun trackLoaded(track: AudioTrack) {
@@ -66,13 +65,15 @@ class AudioResultHandler(
         val size = musicService.getGuildMusicManager(guild).scheduler.getQueueSize() + playlistSize
 
         val richResponse = RichResponse(
-            title = "Playlist added to queue", text = playlist.name, fields = listOf(
+            title = "Playlist added to queue", text = "[${playlist.name}](${
+                firstTrack.info.uri.split("&list=")
+                    .let { if (it.size > 1) "${it[0]}&list=${it[1].split("&")[0]}" else firstTrack.info.uri }
+            })", fields = listOf(
                 MessageEmbed.Field("Songs added", playlistSize.toString(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
             ), footer = RichResponse.Footer(
                 text = "Added by ${member.effectiveName}", imageUrl = member.effectiveAvatarUrl
-            )
-        )
+            ))
 
         if (firstTrack.sourceManager is YoutubeAudioSourceManager) {
             URLUtils.getURLParam(firstTrack.info.uri, "v").ifPresent { s ->
@@ -87,7 +88,7 @@ class AudioResultHandler(
 
     override fun noMatches() {
         val richResponse = RichResponse(
-            type = Response.Type.USER_ERROR, text = "Nothing found"
+            type = RichResponse.Type.USER_ERROR, text = "Nothing found"
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
@@ -96,7 +97,7 @@ class AudioResultHandler(
     override fun loadFailed(exception: FriendlyException) {
         log.error("Error loading track", exception)
         val richResponse = RichResponse(
-            type = Response.Type.ERROR, text = "Internal error"
+            type = RichResponse.Type.ERROR, text = "Internal error"
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }

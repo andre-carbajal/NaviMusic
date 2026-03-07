@@ -7,7 +7,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.andrecarbajal.naviMusic.audio.MusicService
 import net.andrecarbajal.naviMusic.audio.spotify.SpotifySong
 import net.andrecarbajal.naviMusic.dto.VideoInfo
-import net.andrecarbajal.naviMusic.dto.response.Response
 import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
@@ -24,7 +23,7 @@ class SpotifyTrackResultHandler(
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(SpotifyTrackResultHandler::class.java)
-    var response: Response? = null
+    var response: RichResponse? = null
         private set
 
     override fun trackLoaded(track: AudioTrack) {
@@ -57,7 +56,7 @@ class SpotifyTrackResultHandler(
 
     override fun noMatches() {
         val richResponse = RichResponse(
-            type = Response.Type.USER_ERROR, text = "Nothing found"
+            type = RichResponse.Type.USER_ERROR, text = "Nothing found"
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
@@ -66,7 +65,7 @@ class SpotifyTrackResultHandler(
     override fun loadFailed(exception: FriendlyException) {
         log.error("Error loading spotify track", exception)
         val richResponse = RichResponse(
-            type = Response.Type.ERROR, text = "Internal error"
+            type = RichResponse.Type.ERROR, text = "Internal error"
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }

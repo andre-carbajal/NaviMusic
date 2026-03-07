@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.awt.Color
 
 class RichResponse(
-    text: String? = null,
-    type: Type = Type.OK,
-    ephimeral: Boolean = false,
+    var text: String? = null,
+    var type: Type = Type.OK,
+    var ephimeral: Boolean = false,
     var title: String? = null,
     var color: Color? = null,
     var fields: List<MessageEmbed.Field>? = null,
@@ -18,9 +18,12 @@ class RichResponse(
     var author: Author? = null,
     var footer: Footer? = null,
     var member: Member? = null
-) : Response(text, type, ephimeral) {
+) {
+    enum class Type {
+        OK, ERROR, USER_ERROR
+    }
 
-    override fun sendReply(event: SlashCommandInteractionEvent) {
+    fun sendReply(event: SlashCommandInteractionEvent) {
         if (member != null) {
             event.reply(member!!.asMention).addEmbeds(buildEmbed()).queue()
             return
@@ -28,7 +31,7 @@ class RichResponse(
         event.replyEmbeds(buildEmbed()).setEphemeral(ephimeral).queue()
     }
 
-    override fun editReply(event: SlashCommandInteractionEvent) {
+    fun editReply(event: SlashCommandInteractionEvent) {
         event.interaction.hook.editOriginalEmbeds(buildEmbed()).queue()
     }
 

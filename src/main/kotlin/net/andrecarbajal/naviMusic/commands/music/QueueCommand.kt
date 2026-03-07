@@ -3,7 +3,6 @@ package net.andrecarbajal.naviMusic.commands.music
 import net.andrecarbajal.naviMusic.audio.MusicService
 import net.andrecarbajal.naviMusic.commands.SlashCommand
 import net.andrecarbajal.naviMusic.dto.VideoInfo
-import net.andrecarbajal.naviMusic.dto.response.Response
 import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -24,10 +23,9 @@ class QueueCommand(private val musicManager: MusicService) :
         if (queue.isEmpty()) {
             val playingTrack = guildMusicManager.player.playingTrack
             if (playingTrack == null) {
-                Response("No song in queue", Response.Type.OK, false).editReply(event)
+                RichResponse("No song in queue", RichResponse.Type.OK, false).editReply(event)
                 return
             }
-
             val info = playingTrack.info
             RichResponse.builder()
                 .title("Currently playing")

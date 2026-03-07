@@ -17,24 +17,24 @@ class VideoInfo {
     }
 
     fun durationToReadable(): String {
-        val length = info?.length ?: 0L
-        val hours = TimeUnit.MILLISECONDS.toHours(length)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(length) - TimeUnit.HOURS.toMinutes(hours)
-        val seconds =
-            TimeUnit.MILLISECONDS.toSeconds(length) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(length))
-
-        return if (hours > 0) String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        else String.format("%02d:%02d", minutes, seconds)
+        return formatTime(info?.length ?: 0L)
     }
 
     fun durationToReadableFromDuration(): String {
-        val hours = TimeUnit.MILLISECONDS.toHours(duration)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(duration) - TimeUnit.HOURS.toMinutes(hours)
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(
-            TimeUnit.MILLISECONDS.toMinutes(duration)
-        )
+        return formatTime(duration)
+    }
 
-        return if (hours > 0) String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        else String.format("%02d:%02d", minutes, seconds)
+    companion object {
+        @JvmStatic
+        fun formatTime(millis: Long): String {
+            val hours = TimeUnit.MILLISECONDS.toHours(millis)
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(millis) - TimeUnit.HOURS.toMinutes(hours)
+            val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(
+                TimeUnit.MILLISECONDS.toMinutes(millis)
+            )
+
+            return if (hours > 0) String.format("%02d:%02d:%02d", hours, minutes, seconds)
+            else String.format("%02d:%02d", minutes, seconds)
+        }
     }
 }

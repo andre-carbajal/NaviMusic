@@ -1,6 +1,5 @@
 package net.andrecarbajal.naviMusic.commands
 
-import net.andrecarbajal.naviMusic.dto.response.Response
 import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -50,7 +49,7 @@ abstract class SlashCommand {
         if (!inVoiceChannel) {
             val response = RichResponse(
                 ephimeral = true,
-                type = Response.Type.USER_ERROR,
+                type = RichResponse.Type.USER_ERROR,
                 title = "You must be in a voice channel to use this command"
             )
             response.sendReply(e)

@@ -17,9 +17,10 @@ class SkipCommand(private val musicService: MusicService) :
 
     override fun onCommand(event: SlashCommandInteractionEvent) {
         if (noVoiceChannelCheck(event)) return
+        event.deferReply().queue()
 
         val position = event.getOption("position")?.asLong?.toInt() ?: 1
         val textChannel = event.channel.asTextChannel()
-        musicService.skipTrack(textChannel, position).sendReply(event)
+        musicService.skipTrack(textChannel, position).editReply(event)
     }
 }

@@ -11,7 +11,8 @@ class ClearCommand(private val musicService: MusicService) : SlashCommand("clear
     override fun onCommand(event: SlashCommandInteractionEvent) {
         if (noVoiceChannelCheck(event)) return
         val guild = event.guild ?: return
+        event.deferReply().queue()
 
-        musicService.clear(guild).sendReply(event)
+        musicService.clear(guild).editReply(event)
     }
 }

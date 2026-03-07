@@ -2,7 +2,7 @@ package net.andrecarbajal.naviMusic.commands.music
 
 import net.andrecarbajal.naviMusic.audio.MusicService
 import net.andrecarbajal.naviMusic.commands.SlashCommand
-import net.andrecarbajal.naviMusic.dto.response.Response
+import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.stereotype.Component
 
@@ -12,6 +12,7 @@ class LeaveCommand(private val musicManager: MusicService) :
 
     override fun onCommand(event: SlashCommandInteractionEvent) {
         if (noVoiceChannelCheck(event)) return
+        event.deferReply().queue()
 
         val guild = event.guild ?: return
         val guildMusicManager = musicManager.getGuildMusicManager(guild)
@@ -22,6 +23,9 @@ class LeaveCommand(private val musicManager: MusicService) :
         val connectedChannelName = audioManager.connectedChannel?.name ?: "unknown"
         audioManager.closeAudioConnection()
 
-        Response("Leaving the voice channel: $connectedChannelName", Response.Type.OK, false).sendReply(event)
+        RichResponse(
+            title = "Left Voice Channel",
+            text = "Successfully disconnected from: **$connectedChannelName**"
+        ).editReply(event)
     }
 }

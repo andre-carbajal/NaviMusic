@@ -2,7 +2,7 @@ package net.andrecarbajal.naviMusic.commands.music
 
 import net.andrecarbajal.naviMusic.audio.MusicService
 import net.andrecarbajal.naviMusic.commands.SlashCommand
-import net.andrecarbajal.naviMusic.dto.response.Response
+import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.stereotype.Component
 
@@ -16,6 +16,6 @@ class ShuffleCommand(private val musicService: MusicService) :
 
         val guild = event.guild ?: return
         musicService.getGuildMusicManager(guild).scheduler.shuffle()
-        Response("Queue shuffled", Response.Type.OK, false).editReply(event)
+        RichResponse("Queue shuffled", RichResponse.Type.OK, false).editReply(event)
     }
 }

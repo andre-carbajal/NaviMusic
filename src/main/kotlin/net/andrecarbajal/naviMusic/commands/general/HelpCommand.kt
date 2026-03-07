@@ -1,7 +1,7 @@
 package net.andrecarbajal.naviMusic.commands.general
 
 import net.andrecarbajal.naviMusic.commands.SlashCommand
-import net.andrecarbajal.naviMusic.dto.response.Response
+import net.andrecarbajal.naviMusic.dto.response.RichResponse
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import org.springframework.stereotype.Component
 
@@ -24,6 +24,6 @@ class HelpCommand(private val slashCommands: List<SlashCommand>) :
                 sb.append("`").append("/").append(slashCommand.name).append("`").append(" - ")
                     .append(slashCommand.description).append("\n")
             }
-        Response(sb.toString(), Response.Type.OK, false).sendReply(event)
+        RichResponse(sb.toString(), RichResponse.Type.OK, false).sendReply(event)
     }
 }
