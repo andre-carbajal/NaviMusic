@@ -7,8 +7,8 @@ import se.michaelthelin.spotify.SpotifyApi
 
 @Component
 class SpotifyTokenProvider(
-    @Value("\${app.spotify.clientId}") clientId: String,
-    @Value("\${app.spotify.clientSecret}") clientSecret: String
+    @Value($$"${app.spotify.clientId}") private val clientId: String,
+    @Value($$"${app.spotify.clientSecret}") private val clientSecret: String
 ) {
     private val log = LoggerFactory.getLogger(SpotifyTokenProvider::class.java)
 
@@ -21,11 +21,22 @@ class SpotifyTokenProvider(
     private var tokenExpirationTime: Long = 0
 
     init {
-        refreshAccessToken()
+        if (isConfigured()) {
+            refreshAccessToken()
+        } else {
+            log.warn("Spotify API is not configured. Spotify links will not work.")
+        }
+    }
+
+    fun isConfigured(): Boolean {
+        return clientId.isNotBlank() && clientId != "default" && 
+               clientSecret.isNotBlank() && clientSecret != "default"
     }
 
     @Synchronized
     fun getAccessToken(): String? {
+        if (!isConfigured()) return null
+
         if (System.currentTimeMillis() >= tokenExpirationTime) {
             refreshAccessToken()
         }
@@ -38,6 +49,7 @@ class SpotifyTokenProvider(
     }
 
     private fun refreshAccessToken() {
+        if (!isConfigured()) return
         try {
             val clientCredentialsRequest = spotifyApi.clientCredentials().build()
             val clientCredentials = clientCredentialsRequest.execute()

@@ -72,6 +72,14 @@ class MusicService(
         member: Member?,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
+        if (!spotifyFetch.isConfigured()) {
+            return presenter.formatSimpleResponse(
+                "Spotify No Configurado",
+                "El bot no tiene configurada la API de Spotify. Por favor, usa un enlace de YouTube o configura las credenciales de Spotify.",
+                RichResponse.Type.USER_ERROR
+            )
+        }
+
         val connectionFuture = connectToChannel(channel.guild.audioManager, member)
 
         serviceScope.launch {

@@ -19,13 +19,13 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
 
     private val log = LoggerFactory.getLogger(AudioConfig::class.java)
 
-    @Value("\${app.youtube.potoken}")
+    @Value($$"${app.youtube.potoken}")
     private lateinit var poToken: String
 
-    @Value("\${app.youtube.visitor}")
+    @Value($$"${app.youtube.visitor}")
     private lateinit var visitorData: String
 
-    @Value("\${app.youtube.oauth2}")
+    @Value($$"${app.youtube.oauth2}")
     private lateinit var oAuthToken: String
 
     @Bean
@@ -36,31 +36,24 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
             Web.setPoTokenAndVisitorData(poToken, visitorData)
         }
 
-        val useOauth = oAuthToken.isNotBlank() && oAuthToken != "null"
+        val useOauth = oAuthToken.isNotBlank() && oAuthToken != "null" && oAuthToken != "default"
 
-        val clients = mutableListOf<Client>()
-
-        if (useOauth) {
-            clients.add(AndroidVrWithThumbnail())
-            clients.add(AndroidMusicWithThumbnail())
-            clients.add(TvHtml5SimplyWithThumbnail())
-            clients.add(IosWithThumbnail())
-            clients.add(WebWithThumbnail())
-        } else {
-            clients.add(AndroidVrWithThumbnail())
-            clients.add(MusicWithThumbnail())
-            clients.add(WebWithThumbnail())
-            clients.add(TvHtml5SimplyWithThumbnail())
-            clients.add(AndroidMusicWithThumbnail())
-            clients.add(IosWithThumbnail())
+        if (!useOauth) {
+            log.error("YouTube OAuth token is missing! YouTube OAuth is mandatory.")
+            throw RuntimeException("YouTube OAuth token is mandatory. Please provide a valid 'app.youtube.oauth2' in application.properties or as an environment variable.")
         }
 
-        val youtube = YoutubeAudioSourceManager(true, *clients.toTypedArray())
+        val clients = arrayOf<Client>(
+            AndroidVrWithThumbnail(),
+            AndroidMusicWithThumbnail(),
+            TvHtml5SimplyWithThumbnail(),
+            IosWithThumbnail(),
+            WebWithThumbnail()
+        )
 
-        if (useOauth) {
-            youtube.useOauth2(oAuthToken, true)
-            log.info("YouTube OAuth enabled with {} clients (Priority: ANDROID_VR)", clients.size)
-        }
+        val youtube = YoutubeAudioSourceManager(true, *clients)
+        youtube.useOauth2(oAuthToken, true)
+        log.info("YouTube OAuth enabled with {} clients (Priority: ANDROID_VR)", clients.size)
 
         playerManager.registerSourceManager(youtube)
 

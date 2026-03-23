@@ -10,6 +10,8 @@ class SpotifyFetch(private val tokenProvider: SpotifyTokenProvider) {
 
     private val log = LoggerFactory.getLogger(SpotifyFetch::class.java)
 
+    fun isConfigured(): Boolean = tokenProvider.isConfigured()
+
     fun fetchSong(id: String): SpotifySong? {
         return try {
             val spotify = tokenProvider.getSpotifyApi()
