@@ -44,6 +44,7 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
         }
 
         val clients = arrayOf<Client>(
+            Tv(),
             AndroidVrWithThumbnail(),
             AndroidMusicWithThumbnail(),
             TvHtml5SimplyWithThumbnail(),
@@ -53,7 +54,7 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
 
         val youtube = YoutubeAudioSourceManager(true, *clients)
         youtube.useOauth2(oAuthToken, true)
-        log.info("YouTube OAuth enabled with {} clients (Priority: ANDROID_VR)", clients.size)
+        log.info("YouTube OAuth enabled with {} clients (Priority: TV)", clients.size)
 
         playerManager.registerSourceManager(youtube)
 
