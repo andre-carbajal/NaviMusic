@@ -20,7 +20,8 @@ class AudioResultHandler(
     private val guild: Guild,
     private val member: Member,
     private val event: SlashCommandInteractionEvent? = null,
-    private val originalUrl: String? = null
+    private val originalUrl: String? = null,
+    private val onFinished: () -> Unit = {}
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(AudioResultHandler::class.java)
@@ -51,7 +52,7 @@ class AudioResultHandler(
 
         response = richResponse
         event?.let { richResponse.editReply(it) }
-        musicService.play(musicService.getGuildMusicManager(guild), track, member)
+        musicService.play(musicService.getGuildMusicManager(guild), track, member).whenComplete { _, _ -> onFinished() }
     }
 
     override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -95,6 +96,7 @@ class AudioResultHandler(
         response = richResponse
         event?.let { richResponse.editReply(it) }
         musicService.playPlaylist(musicService.getGuildMusicManager(guild), playlist, member)
+            .whenComplete { _, _ -> onFinished() }
     }
 
     override fun noMatches() {
@@ -103,6 +105,7 @@ class AudioResultHandler(
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
+        onFinished()
     }
 
     override fun loadFailed(exception: FriendlyException) {
@@ -112,5 +115,6 @@ class AudioResultHandler(
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
+        onFinished()
     }
 }

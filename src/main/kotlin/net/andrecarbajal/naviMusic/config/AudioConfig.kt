@@ -72,8 +72,9 @@ class AudioConfig(private val musicService: MusicService) : ListenerAdapter() {
 
         if (connectedChannel.members.size == 1) {
             log.info("Bot is alone. Disconnecting and clearing queue.")
-            musicService.getGuildMusicManager(e.guild).scheduler.clear()
+            musicService.clear(e.guild)
             e.guild.audioManager.closeAudioConnection()
+            musicService.releaseGuild(e.guild)
         }
     }
 }

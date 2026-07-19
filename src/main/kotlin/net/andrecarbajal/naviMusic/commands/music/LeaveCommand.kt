@@ -15,13 +15,9 @@ class LeaveCommand(private val musicManager: MusicService) :
         event.deferReply().queue()
 
         val guild = event.guild ?: return
-        val guildMusicManager = musicManager.getGuildMusicManager(guild)
-        guildMusicManager.scheduler.clear()
-        guildMusicManager.player.stopTrack()
-
         val audioManager = guild.audioManager
         val connectedChannelName = audioManager.connectedChannel?.name ?: "unknown"
-        audioManager.closeAudioConnection()
+        musicManager.leave(guild)
 
         RichResponse(
             title = "Left Voice Channel",

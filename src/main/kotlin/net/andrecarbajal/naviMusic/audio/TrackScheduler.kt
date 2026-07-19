@@ -9,7 +9,12 @@ import net.dv8tion.jda.api.entities.Member
 import org.slf4j.LoggerFactory
 import java.util.concurrent.*
 
-class TrackScheduler(private val player: AudioPlayer, private val guild: Guild) : AudioEventAdapter() {
+class TrackScheduler(
+    private val player: AudioPlayer,
+    private val guild: Guild,
+    private val submit: (() -> Unit) -> Unit,
+    private val onDisconnected: () -> Unit
+) : AudioEventAdapter() {
 
     private val log = LoggerFactory.getLogger(TrackScheduler::class.java)
 
@@ -61,6 +66,11 @@ class TrackScheduler(private val player: AudioPlayer, private val guild: Guild) 
 
     fun getQueueSize(): Int = queue.size
 
+    fun shutdown() {
+        cancelDisconnectTimer()
+        executor.shutdownNow()
+    }
+
     fun shuffle() {
         val tracks = queue.toMutableList()
         queue.clear()
@@ -69,6 +79,10 @@ class TrackScheduler(private val player: AudioPlayer, private val guild: Guild) 
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
+        submit { onTrackEndSerial(player, track, endReason) }
+    }
+
+    private fun onTrackEndSerial(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
         if (endReason.mayStartNext) {
             if (isRepeating) {
                 player.startTrack(track.makeClone(), false)
@@ -90,7 +104,7 @@ class TrackScheduler(private val player: AudioPlayer, private val guild: Guild) 
     }
 
     override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
-        cancelDisconnectTimer()
+        submit { cancelDisconnectTimer() }
     }
 
     private fun checkDisconnect() {
@@ -103,6 +117,7 @@ class TrackScheduler(private val player: AudioPlayer, private val guild: Guild) 
         disconnectTask?.cancel(false)
         disconnectTask = executor.schedule({
             guild.audioManager.closeAudioConnection()
+            onDisconnected()
         }, 3, TimeUnit.MINUTES)
     }
 

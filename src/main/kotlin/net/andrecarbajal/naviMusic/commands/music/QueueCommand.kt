@@ -17,11 +17,9 @@ class QueueCommand(private val musicManager: MusicService) :
         event.deferReply().queue()
 
         val guild = event.guild ?: return
-        val guildMusicManager = musicManager.getGuildMusicManager(guild)
-        val queue = guildMusicManager.scheduler.queue.toList()
+        val (playingTrack, queue) = musicManager.queueSnapshot(guild)
 
         if (queue.isEmpty()) {
-            val playingTrack = guildMusicManager.player.playingTrack
             if (playingTrack == null) {
                 RichResponse("No song in queue", RichResponse.Type.OK, false).editReply(event)
                 return
@@ -39,7 +37,7 @@ class QueueCommand(private val musicManager: MusicService) :
         val totalDuration = queue.sumOf { it.duration }
         val builder = StringBuilder()
 
-        for (i in 0 until Math.min(15, totalSongs)) {
+        for (i in 0 until 15.coerceAtMost(totalSongs)) {
             val info = queue[i].info
             builder.append("${i + 1}. ${info.title} `[${VideoInfo(info).durationToReadable()}]`\n")
         }

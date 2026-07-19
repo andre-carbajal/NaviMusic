@@ -19,7 +19,8 @@ class SpotifyTrackResultHandler(
     private val guild: Guild,
     private val member: Member?,
     private val song: SpotifySong,
-    private val event: SlashCommandInteractionEvent? = null
+    private val event: SlashCommandInteractionEvent? = null,
+    private val onFinished: () -> Unit = {}
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(SpotifyTrackResultHandler::class.java)
@@ -30,6 +31,7 @@ class SpotifyTrackResultHandler(
         val richResponse = RichResponse(title = "Not Spotify URL")
         response = richResponse
         event?.let { richResponse.editReply(it) }
+        onFinished()
     }
 
     override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -51,6 +53,7 @@ class SpotifyTrackResultHandler(
             response = richResponse
             event?.let { richResponse.editReply(it) }
             musicService.play(musicService.getGuildMusicManager(guild), firstTrack, member)
+                .whenComplete { _, _ -> onFinished() }
         }
     }
 
@@ -60,6 +63,7 @@ class SpotifyTrackResultHandler(
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
+        onFinished()
     }
 
     override fun loadFailed(exception: FriendlyException) {
@@ -69,5 +73,6 @@ class SpotifyTrackResultHandler(
         )
         response = richResponse
         event?.let { richResponse.editReply(it) }
+        onFinished()
     }
 }

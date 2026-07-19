@@ -15,12 +15,10 @@ class RepeatCommand(private val musicService: MusicService) :
         event.deferReply().queue()
 
         val guild = event.guild ?: return
-        val guildMusicManager = musicService.getGuildMusicManager(guild)
-
-        if (guildMusicManager.scheduler.isRepeating) {
+        if (musicService.isRepeating(guild)) {
             RichResponse("Already repeating", RichResponse.Type.ERROR, false).editReply(event)
         } else {
-            guildMusicManager.scheduler.isRepeating = true
+            musicService.setRepeating(guild, true)
             RichResponse("Repeating the current track", RichResponse.Type.OK, false).editReply(event)
         }
     }

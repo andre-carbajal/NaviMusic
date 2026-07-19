@@ -15,7 +15,7 @@ class ShuffleCommand(private val musicService: MusicService) :
         event.deferReply().queue()
 
         val guild = event.guild ?: return
-        musicService.getGuildMusicManager(guild).scheduler.shuffle()
+        musicService.shuffle(guild)
         RichResponse("Queue shuffled", RichResponse.Type.OK, false).editReply(event)
     }
 }

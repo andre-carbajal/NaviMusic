@@ -11,7 +11,8 @@ import net.dv8tion.jda.api.entities.Member
 import org.slf4j.LoggerFactory
 
 class SpotifyPlaylistResultHandler(
-    private val musicService: MusicService, private val guild: Guild, private val member: Member?
+    private val musicService: MusicService, private val guild: Guild, private val member: Member?,
+    private val onFinished: () -> Unit = {}
 ) : AudioLoadResultHandler {
 
     private val log = LoggerFactory.getLogger(SpotifyPlaylistResultHandler::class.java)
@@ -20,12 +21,14 @@ class SpotifyPlaylistResultHandler(
 
     override fun trackLoaded(track: AudioTrack) {
         response = RichResponse(title = "Not Spotify URL")
+        onFinished()
     }
 
     override fun playlistLoaded(playlist: AudioPlaylist) {
         if (playlist.isSearchResult) {
             val track = playlist.tracks.firstOrNull() ?: return
             musicService.play(musicService.getGuildMusicManager(guild), track, member)
+                .whenComplete { _, _ -> onFinished() }
         }
     }
 
@@ -33,6 +36,7 @@ class SpotifyPlaylistResultHandler(
         response = RichResponse(
             type = RichResponse.Type.USER_ERROR, text = "Nothing found"
         )
+        onFinished()
     }
 
     override fun loadFailed(exception: FriendlyException) {
@@ -40,5 +44,6 @@ class SpotifyPlaylistResultHandler(
         response = RichResponse(
             type = RichResponse.Type.ERROR, text = "Internal error"
         )
+        onFinished()
     }
 }
