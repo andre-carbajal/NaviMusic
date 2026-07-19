@@ -1,5 +1,11 @@
 # Release Notes
 
+### Release pipeline recovery
+
+- Versioned the Maven Wrapper properties required by GitHub Actions, allowing release builds to download the pinned
+  Maven 3.9.12 distribution.
+- Bumped the recovery release to `4.2.1`; the previously published `4.2.0` tag remains unchanged.
+
 ### Improved music queue concurrency
 
 - Added the optional `/play` boolean option `shuffle`. With `shuffle:true`, the bot adds the requested track, playlist,
