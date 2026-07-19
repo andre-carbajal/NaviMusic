@@ -5,65 +5,84 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
-          distribution: 'adopt'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: pom.xml
 
-      - name: Extract version
-        id: extract_version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      - name: Build and verify with Maven
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if ./mvnw --batch-mode --no-transfer-progress clean verify; then
+              exit 0
+            fi
 
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.extract_version.outputs.version }}
-          release_name: NaviMusic ${{ steps.extract_version.outputs.version }}
-          body_path: ./RELEASE_NOTES.md
-          draft: false
-          prerelease: false
+            delay=$((attempt * 20))
+            echo "Maven failed; retrying in ${delay}s (attempt ${attempt}/3)."
+            sleep "$delay"
+          done
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/NaviMusic-${{ steps.extract_version.outputs.version }}.jar
-          asset_name: NaviMusic-${{ steps.extract_version.outputs.version }}.jar
-          asset_content_type: application/java-archive
+      - name: Validate release version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(./mvnw --batch-mode --no-transfer-progress -q -DforceStdout help:evaluate -Dexpression=project.version)"
+          tag="${GITHUB_REF_NAME}"
+
+          if [ "$tag" != "$version" ]; then
+            echo "Tag '$tag' must exactly match project.version '$version'." >&2
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:${{ steps.extract_version.outputs.version }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/navi-music:${{ steps.version.outputs.version }}
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" \
+            "target/NaviMusic-${{ steps.version.outputs.version }}.jar" \
+            --title "NaviMusic ${{ steps.version.outputs.version }}" \
+            --notes-file RELEASE_NOTES.md
