@@ -20,6 +20,7 @@ class SpotifyTrackResultHandler(
     private val member: Member?,
     private val song: SpotifySong,
     private val event: SlashCommandInteractionEvent? = null,
+    private val shuffleAfterAdd: Boolean = false,
     private val onFinished: () -> Unit = {}
 ) : AudioLoadResultHandler {
 
@@ -41,7 +42,7 @@ class SpotifyTrackResultHandler(
 
             val richResponse = RichResponse(
                 title = "Adding Spotify song to queue",
-                text = "${song.title} by `${song.getArtistsString()}`",
+                text = "${song.title} by `${song.getArtistsString()}`" + shuffleNotice(),
                 fields = listOf(
                     MessageEmbed.Field("Duration", VideoInfo(firstTrack.info).durationToReadable(), true),
                     MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
@@ -52,8 +53,9 @@ class SpotifyTrackResultHandler(
             )
             response = richResponse
             event?.let { richResponse.editReply(it) }
-            musicService.play(musicService.getGuildMusicManager(guild), firstTrack, member)
-                .whenComplete { _, _ -> onFinished() }
+            val manager = musicService.getGuildMusicManager(guild)
+            musicService.play(manager, firstTrack, member)
+                .whenComplete { _, _ -> musicService.finishLoad(manager, shuffleAfterAdd, onFinished) }
         }
     }
 
@@ -75,4 +77,7 @@ class SpotifyTrackResultHandler(
         event?.let { richResponse.editReply(it) }
         onFinished()
     }
+
+    private fun shuffleNotice(): String =
+        if (shuffleAfterAdd) "\n\nPending queue will be shuffled after adding." else ""
 }

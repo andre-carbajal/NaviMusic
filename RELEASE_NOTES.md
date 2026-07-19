@@ -2,6 +2,8 @@
 
 ### Improved music queue concurrency
 
+- Added the optional `/play` boolean option `shuffle`. With `shuffle:true`, the bot adds the requested track, playlist,
+  or album and then shuffles every pending track without interrupting the one currently playing.
 - Added isolated, serialized music state per Discord guild. Simultaneous commands in one guild now update the queue in
   arrival order, while separate guilds continue independently.
 - Added an ordered per-guild load pipeline so concurrent `/play` requests cannot be enqueued according to whichever

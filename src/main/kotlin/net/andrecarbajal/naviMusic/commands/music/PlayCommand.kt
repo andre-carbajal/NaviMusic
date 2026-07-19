@@ -17,6 +17,7 @@ class PlayCommand(private val musicService: MusicService) :
 
     init {
         addOption(OptionData(OptionType.STRING, "name-url-playlist", "Link or search query", true))
+        addOption(OptionData(OptionType.BOOLEAN, "shuffle", "Shuffle pending queue after adding", false))
     }
 
     override fun onCommand(event: SlashCommandInteractionEvent) {
@@ -25,18 +26,20 @@ class PlayCommand(private val musicService: MusicService) :
 
         try {
             val query = event.getOption("name-url-playlist")?.asString ?: return
+            val shuffleAfterAdd = event.getOption("shuffle")?.asBoolean ?: false
             val provider = "ytsearch"
             val textChannel = event.channel.asTextChannel()
             val member = event.member
 
             if (URLUtils.isURL(query)) {
                 if (query.contains("spotify", ignoreCase = true)) {
-                    musicService.loadAndPlaySpotifyUrl(textChannel, provider, query, member, event).editReply(event)
+                    musicService.loadAndPlaySpotifyUrl(textChannel, provider, query, member, shuffleAfterAdd, event)
+                        .editReply(event)
                 } else {
-                    musicService.loadAndPlayUrl(textChannel, query, member, event).editReply(event)
+                    musicService.loadAndPlayUrl(textChannel, query, member, shuffleAfterAdd, event).editReply(event)
                 }
             } else {
-                musicService.loadAndPlay(textChannel, provider, query, member, event).editReply(event)
+                musicService.loadAndPlay(textChannel, provider, query, member, shuffleAfterAdd, event).editReply(event)
             }
         } catch (e: Exception) {
             log.error("Error in PlayCommand", e)

@@ -56,10 +56,11 @@ class MusicService(
         provider: String,
         track: String,
         member: Member?,
+        shuffleAfterAdd: Boolean = false,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
         val accepted = loadItem(channel.guild, member, "$provider: $track") { done ->
-            AudioResultHandler(this, channel.guild, member!!, event, null, done)
+            AudioResultHandler(this, channel.guild, member!!, event, null, shuffleAfterAdd, done)
         }
         return loadingResponse(accepted, "Loading...", "Adding track to queue")
     }
@@ -68,10 +69,11 @@ class MusicService(
         channel: TextChannel,
         trackUrl: String,
         member: Member?,
+        shuffleAfterAdd: Boolean = false,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
         val accepted = loadItem(channel.guild, member, trackUrl) { done ->
-            AudioResultHandler(this, channel.guild, member!!, event, trackUrl, done)
+            AudioResultHandler(this, channel.guild, member!!, event, trackUrl, shuffleAfterAdd, done)
         }
         return loadingResponse(accepted, "Loading URL...", "Fetching data from provided link")
     }
@@ -81,6 +83,7 @@ class MusicService(
         provider: String,
         trackUrl: String,
         member: Member?,
+        shuffleAfterAdd: Boolean = false,
         event: SlashCommandInteractionEvent? = null
     ): RichResponse {
         if (!spotifyFetch.isConfigured()) return presenter.formatSimpleResponse(
@@ -94,7 +97,7 @@ class MusicService(
                 try {
                     when (val resource = SpotifyResource.fromUrl(trackUrl)) {
                         is SpotifyResource.Track -> spotifyFetch.fetchSong(resource.id)?.let { song ->
-                            loadSpotifySong(channel.guild, member, provider, song, event, done)
+                            loadSpotifySong(channel.guild, member, provider, song, shuffleAfterAdd, event, done)
                         } ?: done()
 
                         is SpotifyResource.Playlist, is SpotifyResource.Album -> {
@@ -110,6 +113,7 @@ class MusicService(
                                 playlist,
                                 resource,
                                 trackUrl,
+                                shuffleAfterAdd,
                                 event,
                                 done
                             )
@@ -131,13 +135,14 @@ class MusicService(
         member: Member?,
         provider: String,
         song: SpotifySong,
+        shuffleAfterAdd: Boolean,
         event: SlashCommandInteractionEvent?,
         done: () -> Unit
     ) {
         connectToChannel(guild.audioManager, member).thenAccept { connected ->
             if (!connected) done() else audioPlayerManager.loadItem(
                 "$provider: $song",
-                SpotifyTrackResultHandler(this, guild, member, song, event, done)
+                SpotifyTrackResultHandler(this, guild, member, song, event, shuffleAfterAdd, done)
             )
         }
     }
@@ -150,6 +155,7 @@ class MusicService(
         playlist: SpotifyPlaylist,
         resource: SpotifyResource,
         trackUrl: String,
+        shuffleAfterAdd: Boolean,
         event: SlashCommandInteractionEvent?,
         done: () -> Unit
     ) {
@@ -166,10 +172,11 @@ class MusicService(
             event?.let {
                 val type = if (resource is SpotifyResource.Playlist) "playlist" else "album"
                 manager.submit { manager.scheduler.getQueueSize() }.thenAccept { size ->
-                    presenter.formatSpotifyResponse(member, playlist, type, trackUrl, size).editReply(it)
+                    presenter.formatSpotifyResponse(member, playlist, type, trackUrl, size, shuffleAfterAdd)
+                        .editReply(it)
                 }
             }
-            loadSpotifySongsSequentially(manager, channel.guild, member, provider, songs, 0, done)
+            loadSpotifySongsSequentially(manager, channel.guild, member, provider, songs, 0, shuffleAfterAdd, done)
         }
     }
 
@@ -180,13 +187,14 @@ class MusicService(
         provider: String,
         songs: List<SpotifySong>,
         index: Int,
+        shuffleAfterAdd: Boolean,
         done: () -> Unit
     ) {
         if (index >= songs.size) {
-            done(); return
+            finishLoad(manager, shuffleAfterAdd, done); return
         }
         audioPlayerManager.loadItem("$provider: ${songs[index]}", SpotifyPlaylistResultHandler(this, guild, member) {
-            loadSpotifySongsSequentially(manager, guild, member, provider, songs, index + 1, done)
+            loadSpotifySongsSequentially(manager, guild, member, provider, songs, index + 1, shuffleAfterAdd, done)
         })
     }
 
@@ -262,6 +270,17 @@ class MusicService(
 
     fun shuffle(guild: Guild) {
         getGuildMusicManager(guild).submit { getGuildMusicManager(guild).scheduler.shuffle() }
+    }
+
+    fun finishLoad(manager: GuildMusicManager, shuffleAfterAdd: Boolean, done: () -> Unit) {
+        if (!shuffleAfterAdd) {
+            done()
+            return
+        }
+        manager.submit { manager.scheduler.shuffle() }.whenComplete { _, exception ->
+            if (exception != null) log.error("Unable to shuffle queue", exception)
+            done()
+        }
     }
 
     fun setRepeating(guild: Guild, repeating: Boolean): Boolean {

@@ -47,14 +47,15 @@ class MusicPresenter {
         playlist: SpotifyPlaylist,
         type: String,
         url: String,
-        currentQueueSize: Int
+        currentQueueSize: Int,
+        shuffleAfterAdd: Boolean = false
     ): RichResponse {
         val playlistSize = playlist.songs.size
         val totalQueueSize = currentQueueSize + playlistSize
 
         return RichResponse(
             title = "Adding Spotify $type to queue",
-            text = "[${playlist.title}]($url)",
+            text = "[${playlist.title}]($url)" + if (shuffleAfterAdd) "\n\nPending queue will be shuffled after adding." else "",
             fields = listOf(
                 MessageEmbed.Field("Songs", "$playlistSize songs", true),
                 MessageEmbed.Field("In queue", if (totalQueueSize == 1) "1 song" else "$totalQueueSize songs", true)

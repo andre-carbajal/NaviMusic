@@ -21,6 +21,7 @@ class AudioResultHandler(
     private val member: Member,
     private val event: SlashCommandInteractionEvent? = null,
     private val originalUrl: String? = null,
+    private val shuffleAfterAdd: Boolean = false,
     private val onFinished: () -> Unit = {}
 ) : AudioLoadResultHandler {
 
@@ -34,7 +35,7 @@ class AudioResultHandler(
 
         val richResponse = RichResponse(
             title = "Song added to queue",
-            text = "[${trackInfo.title.trim()}](${originalUrl ?: trackInfo.uri}) by `${trackInfo.author}`",
+            text = "[${trackInfo.title.trim()}](${originalUrl ?: trackInfo.uri}) by `${trackInfo.author}`" + shuffleNotice(),
             fields = listOf(
                 MessageEmbed.Field("Duration", VideoInfo(trackInfo).durationToReadable(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
@@ -52,7 +53,10 @@ class AudioResultHandler(
 
         response = richResponse
         event?.let { richResponse.editReply(it) }
-        musicService.play(musicService.getGuildMusicManager(guild), track, member).whenComplete { _, _ -> onFinished() }
+        val manager = musicService.getGuildMusicManager(guild)
+        musicService.play(manager, track, member).whenComplete { _, _ ->
+            musicService.finishLoad(manager, shuffleAfterAdd, onFinished)
+        }
     }
 
     override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -77,7 +81,7 @@ class AudioResultHandler(
 
         val richResponse = RichResponse(
             title = "Playlist added to queue",
-            text = "[${playlist.name}]($playlistUrl)",
+            text = "[${playlist.name}]($playlistUrl)" + shuffleNotice(),
             fields = listOf(
                 MessageEmbed.Field("Songs added", playlistSize.toString(), true),
                 MessageEmbed.Field("In queue", if (size == 1) "1 song" else "$size songs", true)
@@ -95,8 +99,9 @@ class AudioResultHandler(
 
         response = richResponse
         event?.let { richResponse.editReply(it) }
-        musicService.playPlaylist(musicService.getGuildMusicManager(guild), playlist, member)
-            .whenComplete { _, _ -> onFinished() }
+        val manager = musicService.getGuildMusicManager(guild)
+        musicService.playPlaylist(manager, playlist, member)
+            .whenComplete { _, _ -> musicService.finishLoad(manager, shuffleAfterAdd, onFinished) }
     }
 
     override fun noMatches() {
@@ -117,4 +122,7 @@ class AudioResultHandler(
         event?.let { richResponse.editReply(it) }
         onFinished()
     }
+
+    private fun shuffleNotice(): String =
+        if (shuffleAfterAdd) "\n\nPending queue will be shuffled after adding." else ""
 }

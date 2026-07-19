@@ -75,7 +75,7 @@ class TrackScheduler(
         val tracks = queue.toMutableList()
         queue.clear()
         tracks.shuffle()
-        tracks.forEach { queue(it) }
+        queue.addAll(tracks)
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
